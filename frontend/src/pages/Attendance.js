@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { attendanceAPI, subjectsAPI, departmentsAPI } from '../services/api';
-import { Calendar, Search, Filter, CheckCircle, XCircle, Clock } from 'lucide-react';
+import { attendanceAPI, subjectsAPI, departmentsAPI, studentsAPI } from '../services/api';
+import { Calendar, Search, Filter, CheckCircle, XCircle, Clock, Plus, Edit, Trash2 } from 'lucide-react';
 
 const Attendance = () => {
   const [attendance, setAttendance] = useState([]);
@@ -11,20 +11,31 @@ const Attendance = () => {
   const [filterSubject, setFilterSubject] = useState('');
   const [filterDate, setFilterDate] = useState('');
   const [reportData, setReportData] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [editingAttendance, setEditingAttendance] = useState(null);
+  const [students, setStudents] = useState([]);
 
   useEffect(() => {
     fetchAttendance();
     fetchSubjects();
     fetchDepartments();
+    fetchStudents();
     fetchAttendanceReport();
   }, []);
+
+  // Debug: Log the component state
+  useEffect(() => {
+    console.log('Attendance Management - Current state:', { 
+      attendanceLength: attendance.length, 
+      studentsLength: students.length, 
+      subjectsLength: subjects.length 
+    });
+  }, [attendance, students, subjects]);
 
   const fetchAttendance = async () => {
     try {
       const response = await attendanceAPI.getAll();
-      if (response.data.success) {
-        setAttendance(response.data.data);
-      }
+      setAttendance(response.data);
     } catch (error) {
       console.error('Error fetching attendance:', error);
     } finally {
@@ -35,9 +46,7 @@ const Attendance = () => {
   const fetchSubjects = async () => {
     try {
       const response = await subjectsAPI.getAll();
-      if (response.data.success) {
-        setSubjects(response.data.data);
-      }
+      setSubjects(response.data);
     } catch (error) {
       console.error('Error fetching subjects:', error);
     }
@@ -46,11 +55,18 @@ const Attendance = () => {
   const fetchDepartments = async () => {
     try {
       const response = await departmentsAPI.getAll();
-      if (response.data.success) {
-        setDepartments(response.data.data);
-      }
+      setDepartments(response.data);
     } catch (error) {
       console.error('Error fetching departments:', error);
+    }
+  };
+
+  const fetchStudents = async () => {
+    try {
+      const response = await studentsAPI.getAll();
+      setStudents(response.data);
+    } catch (error) {
+      console.error('Error fetching students:', error);
     }
   };
 
@@ -66,9 +82,15 @@ const Attendance = () => {
   };
 
   const filteredAttendance = attendance.filter(record => {
-    const matchesSearch = record.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         record.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         record.roll_number.toLowerCase().includes(searchTerm.toLowerCase());
+    const student = students.find(s => s.id == record.student_id);
+    const subject = subjects.find(s => s.id == record.subject_id);
+    
+    const studentName = student ? `${student.first_name} ${student.last_name}`.toLowerCase() : '';
+    const rollNumber = student ? student.roll_number.toLowerCase() : '';
+    const searchTermLower = searchTerm.toLowerCase();
+    
+    const matchesSearch = studentName.includes(searchTermLower) ||
+                         rollNumber.includes(searchTermLower);
     const matchesSubject = !filterSubject || record.subject_id == filterSubject;
     const matchesDate = !filterDate || record.date === filterDate;
     return matchesSearch && matchesSubject && matchesDate;
@@ -96,6 +118,39 @@ const Attendance = () => {
     return <span className={`badge ${styles[status]}`}>{status}</span>;
   };
 
+  const handleAddAttendance = () => {
+    setEditingAttendance(null);
+    setShowModal(true);
+  };
+
+  const handleEditAttendance = (attendance) => {
+    setEditingAttendance(attendance);
+    setShowModal(true);
+  };
+
+  const handleDeleteAttendance = async (attendanceId) => {
+    if (window.confirm('Are you sure you want to delete this attendance record?')) {
+      try {
+        // Note: attendance API doesn't have delete, but we can add it if needed
+        console.log('Delete attendance:', attendanceId);
+      } catch (error) {
+        console.error('Error deleting attendance:', error);
+      }
+    }
+  };
+
+  const handleSaveAttendance = async (attendanceData) => {
+    try {
+      console.log('Saving attendance data:', attendanceData);
+      const response = await attendanceAPI.create(attendanceData);
+      console.log('Attendance save response:', response);
+      setShowModal(false);
+      fetchAttendance();
+    } catch (error) {
+      console.error('Error saving attendance:', error);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -108,7 +163,7 @@ const Attendance = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-secondary-900">Attendance Management</h1>
-        <button className="btn btn-primary flex items-center">
+        <button className="btn btn-primary flex items-center" onClick={handleAddAttendance}>
           <Calendar className="h-4 w-4 mr-2" />
           Mark Attendance
         </button>
@@ -187,7 +242,7 @@ const Attendance = () => {
           >
             <option value="">All Subjects</option>
             {subjects.map(subject => (
-              <option key={subject.subject_id} value={subject.subject_id}>
+              <option key={subject.id} value={subject.id}>
                 {subject.subject_name}
               </option>
             ))}
@@ -218,27 +273,49 @@ const Attendance = () => {
                 <th>Status</th>
                 <th>Faculty</th>
                 <th>Remarks</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {filteredAttendance.map(record => (
-                <tr key={record.attendance_id}>
-                  <td>
-                    <div className="flex items-center">
-                      {getStatusIcon(record.status)}
-                      <span className="ml-2">
-                        {record.first_name} {record.last_name}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="font-medium">{record.roll_number}</td>
-                  <td>{record.subject_name}</td>
-                  <td>{new Date(record.date).toLocaleDateString()}</td>
-                  <td>{getStatusBadge(record.status)}</td>
-                  <td>{record.faculty_first_name} {record.faculty_last_name}</td>
-                  <td className="text-sm text-secondary-600">{record.remarks || '-'}</td>
-                </tr>
-              ))}
+              {filteredAttendance.map(record => {
+                const student = students.find(s => s.id == record.student_id);
+                const subject = subjects.find(s => s.id == record.subject_id);
+                
+                return (
+                  <tr key={record.id}>
+                    <td>
+                      <div className="flex items-center">
+                        {getStatusIcon(record.status)}
+                        <span className="ml-2">
+                          {student ? `${student.first_name} ${student.last_name}` : 'Unknown Student'}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="font-medium">{student ? student.roll_number : 'N/A'}</td>
+                    <td>{subject ? subject.subject_name : 'Unknown Subject'}</td>
+                    <td>{new Date(record.date).toLocaleDateString()}</td>
+                    <td>{getStatusBadge(record.status)}</td>
+                    <td>Admin</td>
+                    <td className="text-sm text-secondary-600">{record.remarks || '-'}</td>
+                    <td>
+                      <div className="flex space-x-2">
+                        <button 
+                          className="text-blue-600 hover:text-blue-800"
+                          onClick={() => handleEditAttendance(record)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </button>
+                        <button 
+                          className="text-red-600 hover:text-red-800"
+                          onClick={() => handleDeleteAttendance(record.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -251,7 +328,149 @@ const Attendance = () => {
           <p className="text-secondary-500">Start marking attendance to see records here.</p>
         </div>
       )}
+
+      {/* Attendance Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <h2 className="text-xl font-bold mb-4">
+              {editingAttendance ? 'Edit Attendance' : 'Mark Attendance'}
+            </h2>
+            
+            <AttendanceForm 
+              attendance={editingAttendance}
+              students={students}
+              subjects={subjects}
+              onSave={handleSaveAttendance}
+              onCancel={() => setShowModal(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
+  );
+};
+
+// Attendance Form Component
+const AttendanceForm = ({ attendance, students, subjects, onSave, onCancel }) => {
+  console.log('AttendanceForm props:', { attendance, students, subjects });
+  
+  const [formData, setFormData] = useState({
+    student_id: attendance?.student_id || '',
+    subject_id: attendance?.subject_id || '',
+    date: attendance?.date || new Date().toISOString().split('T')[0],
+    status: attendance?.status || 'present',
+    remarks: attendance?.remarks || ''
+  });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log('Form submitted with data:', formData);
+    onSave(formData);
+  };
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-secondary-700 mb-1">Student</label>
+          <select
+            name="student_id"
+            value={formData.student_id}
+            onChange={handleChange}
+            className="input"
+            required
+          >
+            <option value="">Select Student</option>
+            {students.map(student => (
+              <option key={student.id} value={student.id}>
+                {student.first_name} {student.last_name} ({student.roll_number})
+              </option>
+            ))}
+          </select>
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-secondary-700 mb-1">Subject</label>
+          <select
+            name="subject_id"
+            value={formData.subject_id}
+            onChange={handleChange}
+            className="input"
+            required
+          >
+            <option value="">Select Subject</option>
+            {subjects.map(subject => (
+              <option key={subject.id} value={subject.id}>
+                {subject.subject_name}
+              </option>
+            ))}
+          </select>
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-secondary-700 mb-1">Date</label>
+          <input
+            type="date"
+            name="date"
+            value={formData.date}
+            onChange={handleChange}
+            className="input"
+            required
+          />
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-secondary-700 mb-1">Status</label>
+          <select
+            name="status"
+            value={formData.status}
+            onChange={handleChange}
+            className="input"
+            required
+          >
+            <option value="present">Present</option>
+            <option value="absent">Absent</option>
+            <option value="late">Late</option>
+          </select>
+        </div>
+      </div>
+      
+      <div>
+        <label className="block text-sm font-medium text-secondary-700 mb-1">Remarks</label>
+        <textarea
+          name="remarks"
+          value={formData.remarks}
+          onChange={handleChange}
+          className="input"
+          rows="3"
+          placeholder="Additional remarks..."
+        />
+      </div>
+      
+      <div className="flex justify-end space-x-3 pt-4">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="btn btn-secondary"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          className="btn btn-primary"
+        >
+          {attendance ? 'Update' : 'Save'} Attendance
+        </button>
+      </div>
+    </form>
   );
 };
 
