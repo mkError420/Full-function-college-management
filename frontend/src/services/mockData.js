@@ -592,6 +592,28 @@ export const mockAPI = {
       mockData.attendance.push(newAttendance);
       saveData();
       return { data: { success: true, message: 'Attendance marked successfully', attendance: newAttendance } };
+    },
+    
+    delete: async (id) => {
+      await new Promise(resolve => setTimeout(resolve, 500));
+      const index = mockData.attendance.findIndex(a => a.id == id);
+      if (index !== -1) {
+        mockData.attendance.splice(index, 1);
+        saveData();
+        return { data: { success: true, message: 'Attendance deleted successfully' } };
+      }
+      return { data: { success: false, message: 'Attendance not found' } };
+    },
+    
+    update: async (id, attendanceData) => {
+      await new Promise(resolve => setTimeout(resolve, 800));
+      const index = mockData.attendance.findIndex(a => a.id == id);
+      if (index !== -1) {
+        mockData.attendance[index] = { ...mockData.attendance[index], ...attendanceData };
+        saveData();
+        return { data: { success: true, message: 'Attendance updated successfully', attendance: mockData.attendance[index] } };
+      }
+      return { data: { success: false, message: 'Attendance not found' } };
     }
   },
 

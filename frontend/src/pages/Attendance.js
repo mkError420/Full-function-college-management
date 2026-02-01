@@ -131,10 +131,16 @@ const Attendance = () => {
   const handleDeleteAttendance = async (attendanceId) => {
     if (window.confirm('Are you sure you want to delete this attendance record?')) {
       try {
-        // Note: attendance API doesn't have delete, but we can add it if needed
-        console.log('Delete attendance:', attendanceId);
+        const response = await attendanceAPI.delete(attendanceId);
+        if (response.data && response.data.success) {
+          fetchAttendance();
+          alert('Attendance deleted successfully!');
+        } else {
+          alert('Error deleting attendance: ' + (response.data?.message || 'Unknown error'));
+        }
       } catch (error) {
         console.error('Error deleting attendance:', error);
+        alert('Error deleting attendance. Please try again.');
       }
     }
   };
@@ -142,12 +148,26 @@ const Attendance = () => {
   const handleSaveAttendance = async (attendanceData) => {
     try {
       console.log('Saving attendance data:', attendanceData);
-      const response = await attendanceAPI.create(attendanceData);
+      
+      let response;
+      if (editingAttendance) {
+        response = await attendanceAPI.update(editingAttendance.id, attendanceData);
+      } else {
+        response = await attendanceAPI.create(attendanceData);
+      }
+      
       console.log('Attendance save response:', response);
-      setShowModal(false);
-      fetchAttendance();
+      
+      if (response.data && response.data.success) {
+        setShowModal(false);
+        fetchAttendance();
+        alert(editingAttendance ? 'Attendance updated successfully!' : 'Attendance marked successfully!');
+      } else {
+        alert('Error saving attendance: ' + (response.data?.message || 'Unknown error'));
+      }
     } catch (error) {
       console.error('Error saving attendance:', error);
+      alert('Error saving attendance. Please try again.');
     }
   };
 
@@ -366,6 +386,15 @@ const AttendanceForm = ({ attendance, students, subjects, onSave, onCancel }) =>
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log('Form submitted with data:', formData);
+    
+    // Validate required fields
+    if (!formData.student_id || !formData.subject_id || !formData.date || !formData.status) {
+      console.error('Missing required fields:', formData);
+      alert('Please fill all required fields');
+      return;
+    }
+    
+    console.log('All fields valid, calling onSave...');
     onSave(formData);
   };
 
@@ -395,6 +424,7 @@ const AttendanceForm = ({ attendance, students, subjects, onSave, onCancel }) =>
               </option>
             ))}
           </select>
+          {students.length === 0 && <p className="text-red-500 text-sm mt-1">No students available</p>}
         </div>
         
         <div>
@@ -413,6 +443,7 @@ const AttendanceForm = ({ attendance, students, subjects, onSave, onCancel }) =>
               </option>
             ))}
           </select>
+          {subjects.length === 0 && <p className="text-red-500 text-sm mt-1">No subjects available</p>}
         </div>
         
         <div>

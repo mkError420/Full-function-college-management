@@ -102,6 +102,7 @@ export const departmentsAPI = {
 export const attendanceAPI = {
   getAll: mockAPI.attendance.getAll,
   create: mockAPI.attendance.create,
+  delete: mockAPI.attendance.delete,
   update: mockAPI.attendance.update,
   getStudents: mockAPI.students.getAll,
   getSubjects: mockAPI.subjects.getAll,

@@ -9,6 +9,7 @@ const Subjects = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterDepartment, setFilterDepartment] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [editingSubject, setEditingSubject] = useState(null);
 
   useEffect(() => {
     fetchSubjects();
@@ -18,9 +19,7 @@ const Subjects = () => {
   const fetchSubjects = async () => {
     try {
       const response = await subjectsAPI.getAll();
-      if (response.data.success) {
-        setSubjects(response.data.data);
-      }
+      setSubjects(response.data);
     } catch (error) {
       console.error('Error fetching subjects:', error);
     } finally {
@@ -31,9 +30,7 @@ const Subjects = () => {
   const fetchDepartments = async () => {
     try {
       const response = await departmentsAPI.getAll();
-      if (response.data.success) {
-        setDepartments(response.data.data);
-      }
+      setDepartments(response.data);
     } catch (error) {
       console.error('Error fetching departments:', error);
     }
@@ -48,8 +45,57 @@ const Subjects = () => {
 
   const getSemesterBadge = (semester) => {
     const colors = ['bg-blue-100 text-blue-800', 'bg-green-100 text-green-800', 'bg-yellow-100 text-yellow-800', 
-                   'bg-purple-100 text-purple-800', 'bg-pink-100 text-pink-800', 'bg-indigo-100 text-indigo-800'];
-    return <span className={`badge ${colors[(semester - 1) % colors.length]}`}>Semester {semester}</span>;
+                       'bg-purple-100 text-purple-800', 'bg-red-100 text-red-800'];
+    return <span className={`px-2 py-1 rounded-full text-xs font-medium ${colors[semester - 1] || colors[0]}`}>Semester {semester}</span>;
+  };
+
+  const handleAddSubject = () => {
+    setEditingSubject(null);
+    setShowModal(true);
+  };
+
+  const handleEditSubject = (subject) => {
+    setEditingSubject(subject);
+    setShowModal(true);
+  };
+
+  const handleDeleteSubject = async (subjectId) => {
+    if (window.confirm('Are you sure you want to delete this subject?')) {
+      try {
+        const response = await subjectsAPI.delete(subjectId);
+        if (response.data && response.data.success) {
+          fetchSubjects();
+          alert('Subject deleted successfully!');
+        } else {
+          alert('Error deleting subject: ' + (response.data?.message || 'Unknown error'));
+        }
+      } catch (error) {
+        console.error('Error deleting subject:', error);
+        alert('Error deleting subject. Please try again.');
+      }
+    }
+  };
+
+  const handleSaveSubject = async (subjectData) => {
+    try {
+      let response;
+      if (editingSubject) {
+        response = await subjectsAPI.update(editingSubject.id, subjectData);
+      } else {
+        response = await subjectsAPI.create(subjectData);
+      }
+      
+      if (response.data && response.data.success) {
+        setShowModal(false);
+        fetchSubjects();
+        alert(editingSubject ? 'Subject updated successfully!' : 'Subject added successfully!');
+      } else {
+        alert('Error saving subject: ' + (response.data?.message || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Error saving subject:', error);
+      alert('Error saving subject. Please try again.');
+    }
   };
 
   if (loading) {
@@ -64,7 +110,7 @@ const Subjects = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-secondary-900">Subjects Management</h1>
-        <button className="btn btn-primary flex items-center" onClick={() => setShowModal(true)}>
+        <button className="btn btn-primary flex items-center" onClick={handleAddSubject}>
           <Plus className="h-4 w-4 mr-2" />
           Add Subject
         </button>
@@ -90,7 +136,7 @@ const Subjects = () => {
           >
             <option value="">All Departments</option>
             {departments.map(dept => (
-              <option key={dept.department_id} value={dept.department_id}>
+              <option key={dept.id} value={dept.id}>
                 {dept.department_name}
               </option>
             ))}
@@ -105,7 +151,7 @@ const Subjects = () => {
       {/* Subjects Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredSubjects.map(subject => (
-          <div key={subject.subject_id} className="card">
+          <div key={subject.id} className="card">
             <div className="card-body">
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center">
@@ -141,10 +187,16 @@ const Subjects = () => {
               )}
 
               <div className="flex justify-end space-x-2 mt-4">
-                <button className="text-blue-600 hover:text-blue-800">
+                <button 
+                  className="text-blue-600 hover:text-blue-800"
+                  onClick={() => handleEditSubject(subject)}
+                >
                   <Edit className="h-4 w-4" />
                 </button>
-                <button className="text-red-600 hover:text-red-800">
+                <button 
+                  className="text-red-600 hover:text-red-800"
+                  onClick={() => handleDeleteSubject(subject.id)}
+                >
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>
@@ -160,7 +212,159 @@ const Subjects = () => {
           <p className="text-secondary-500">Get started by adding a new subject.</p>
         </div>
       )}
+
+      {/* Subject Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <h2 className="text-xl font-bold mb-4">
+              {editingSubject ? 'Edit Subject' : 'Add New Subject'}
+            </h2>
+            
+            <SubjectForm 
+              subject={editingSubject}
+              departments={departments}
+              onSave={handleSaveSubject}
+              onCancel={() => setShowModal(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
+  );
+};
+
+// Subject Form Component
+const SubjectForm = ({ subject, departments, onSave, onCancel }) => {
+  const [formData, setFormData] = useState({
+    subject_name: subject?.subject_name || '',
+    subject_code: subject?.subject_code || '',
+    department_id: subject?.department_id || '',
+    semester: subject?.semester || '',
+    credit_hours: subject?.credit_hours || '',
+    description: subject?.description || ''
+  });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSave(formData);
+  };
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-secondary-700 mb-1">Subject Name</label>
+          <input
+            type="text"
+            name="subject_name"
+            value={formData.subject_name}
+            onChange={handleChange}
+            className="input"
+            placeholder="e.g., Anatomy"
+            required
+          />
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-secondary-700 mb-1">Subject Code</label>
+          <input
+            type="text"
+            name="subject_code"
+            value={formData.subject_code}
+            onChange={handleChange}
+            className="input"
+            placeholder="e.g., ANAT101"
+            required
+          />
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-secondary-700 mb-1">Department</label>
+          <select
+            name="department_id"
+            value={formData.department_id}
+            onChange={handleChange}
+            className="input"
+            required
+          >
+            <option value="">Select Department</option>
+            {departments.map(dept => (
+              <option key={dept.id} value={dept.id}>
+                {dept.department_name}
+              </option>
+            ))}
+          </select>
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-secondary-700 mb-1">Semester</label>
+          <select
+            name="semester"
+            value={formData.semester}
+            onChange={handleChange}
+            className="input"
+            required
+          >
+            <option value="">Select Semester</option>
+            <option value="1">Semester 1</option>
+            <option value="2">Semester 2</option>
+            <option value="3">Semester 3</option>
+            <option value="4">Semester 4</option>
+            <option value="5">Semester 5</option>
+          </select>
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-secondary-700 mb-1">Credit Hours</label>
+          <input
+            type="number"
+            name="credit_hours"
+            value={formData.credit_hours}
+            onChange={handleChange}
+            className="input"
+            placeholder="e.g., 3"
+            min="1"
+            required
+          />
+        </div>
+      </div>
+      
+      <div>
+        <label className="block text-sm font-medium text-secondary-700 mb-1">Description</label>
+        <textarea
+          name="description"
+          value={formData.description}
+          onChange={handleChange}
+          className="input"
+          rows="3"
+          placeholder="Subject description..."
+        />
+      </div>
+      
+      <div className="flex justify-end space-x-3 pt-4">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="btn btn-secondary"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          className="btn btn-primary"
+        >
+          {subject ? 'Update' : 'Save'} Subject
+        </button>
+      </div>
+    </form>
   );
 };
 
