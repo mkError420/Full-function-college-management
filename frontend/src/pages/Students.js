@@ -57,10 +57,9 @@ const Students = () => {
 
   const getStatusBadge = (status) => {
     const styles = {
-      active: 'badge-success',
+      active: 'badge-error',
       graduated: 'badge-info',
-      suspended: 'badge-warning',
-      withdrawn: 'badge-danger'
+      suspended: 'badge-warning'
     };
     return <span className={`badge ${styles[status] || 'badge-secondary'}`}>{status}</span>;
   };
@@ -302,74 +301,79 @@ const StudentForm = ({ student, departments, batches, onSave, onCancel }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <form onSubmit={handleSubmit} className="space-y-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
         <div>
-          <label className="block text-sm font-medium text-secondary-700 mb-1">Roll Number</label>
+          <label className="block text-xs font-medium text-secondary-700 mb-1">Roll Number</label>
           <input
             type="text"
             name="roll_number"
             value={formData.roll_number}
             onChange={handleChange}
-            className="input"
+            className="input text-xs"
+            placeholder="e.g., 2024-001"
             required
           />
         </div>
         
         <div>
-          <label className="block text-sm font-medium text-secondary-700 mb-1">Email</label>
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            className="input"
-            required
-          />
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-secondary-700 mb-1">First Name</label>
+          <label className="block text-xs font-medium text-secondary-700 mb-1">First Name</label>
           <input
             type="text"
             name="first_name"
             value={formData.first_name}
             onChange={handleChange}
-            className="input"
+            className="input text-xs"
+            placeholder="e.g., John"
             required
           />
         </div>
         
         <div>
-          <label className="block text-sm font-medium text-secondary-700 mb-1">Last Name</label>
+          <label className="block text-xs font-medium text-secondary-700 mb-1">Last Name</label>
           <input
             type="text"
             name="last_name"
             value={formData.last_name}
             onChange={handleChange}
-            className="input"
+            className="input text-xs"
+            placeholder="e.g., Doe"
             required
           />
         </div>
         
         <div>
-          <label className="block text-sm font-medium text-secondary-700 mb-1">Phone</label>
+          <label className="block text-xs font-medium text-secondary-700 mb-1">Email</label>
+          <input
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            className="input text-xs"
+            placeholder="e.g., john.doe@college.edu"
+            required
+          />
+        </div>
+        
+        <div>
+          <label className="block text-xs font-medium text-secondary-700 mb-1">Phone</label>
           <input
             type="tel"
             name="phone"
             value={formData.phone}
             onChange={handleChange}
-            className="input"
+            className="input text-xs"
+            placeholder="e.g., +1234567890"
           />
         </div>
         
         <div>
-          <label className="block text-sm font-medium text-secondary-700 mb-1">Department</label>
+          <label className="block text-xs font-medium text-secondary-700 mb-1">Department</label>
           <select
             name="department_id"
             value={formData.department_id}
             onChange={handleChange}
-            className="input"
+            className="input text-xs"
             required
           >
             <option value="">Select Department</option>
@@ -382,58 +386,59 @@ const StudentForm = ({ student, departments, batches, onSave, onCancel }) => {
         </div>
         
         <div>
-          <label className="block text-sm font-medium text-secondary-700 mb-1">Batch</label>
+          <label className="block text-xs font-medium text-secondary-700 mb-1">Batch</label>
           <select
             name="batch_id"
             value={formData.batch_id}
             onChange={handleChange}
-            className="input"
+            className="input text-xs"
             required
           >
             <option value="">Select Batch</option>
-            {batches
-              .filter(batch => !formData.department_id || batch.department_id == formData.department_id)
-              .map(batch => (
-                <option key={batch.id} value={batch.id}>
-                  {batch.batch_name}
-                </option>
-              ))}
+            {batches.map(batch => (
+              <option key={batch.id} value={batch.id}>
+                {batch.batch_name}
+              </option>
+            ))}
           </select>
         </div>
         
         <div>
-          <label className="block text-sm font-medium text-secondary-700 mb-1">Semester</label>
-          <input
-            type="number"
+          <label className="block text-xs font-medium text-secondary-700 mb-1">Semester</label>
+          <select
             name="semester"
             value={formData.semester}
             onChange={handleChange}
-            className="input"
-            min="1"
-            max="10"
+            className="input text-xs"
             required
-          />
+          >
+            <option value="1">Semester 1</option>
+            <option value="2">Semester 2</option>
+            <option value="3">Semester 3</option>
+            <option value="4">Semester 4</option>
+            <option value="5">Semester 5</option>
+          </select>
         </div>
         
         <div>
-          <label className="block text-sm font-medium text-secondary-700 mb-1">Date of Birth</label>
+          <label className="block text-xs font-medium text-secondary-700 mb-1">Date of Birth</label>
           <input
             type="date"
             name="date_of_birth"
             value={formData.date_of_birth}
             onChange={handleChange}
-            className="input"
+            className="input text-xs"
             required
           />
         </div>
         
         <div>
-          <label className="block text-sm font-medium text-secondary-700 mb-1">Gender</label>
+          <label className="block text-xs font-medium text-secondary-700 mb-1">Gender</label>
           <select
             name="gender"
             value={formData.gender}
             onChange={handleChange}
-            className="input"
+            className="input text-xs"
             required
           >
             <option value="">Select Gender</option>
@@ -444,40 +449,41 @@ const StudentForm = ({ student, departments, batches, onSave, onCancel }) => {
         </div>
         
         <div>
-          <label className="block text-sm font-medium text-secondary-700 mb-1">Admission Date</label>
+          <label className="block text-xs font-medium text-secondary-700 mb-1">Admission Date</label>
           <input
             type="date"
             name="admission_date"
             value={formData.admission_date}
             onChange={handleChange}
-            className="input"
+            className="input text-xs"
             required
           />
         </div>
       </div>
       
       <div>
-        <label className="block text-sm font-medium text-secondary-700 mb-1">Address</label>
+        <label className="block text-xs font-medium text-secondary-700 mb-1">Address</label>
         <textarea
           name="address"
           value={formData.address}
           onChange={handleChange}
-          className="input"
-          rows="3"
+          className="input text-xs"
+          rows="2"
+          placeholder="Student address..."
         />
       </div>
       
-      <div className="flex justify-end space-x-3 pt-4">
+      <div className="flex justify-end space-x-2 pt-2">
         <button
           type="button"
           onClick={onCancel}
-          className="btn btn-secondary"
+          className="btn btn-secondary text-xs px-3 py-1"
         >
           Cancel
         </button>
         <button
           type="submit"
-          className="btn btn-primary"
+          className="btn btn-primary text-xs px-3 py-1"
         >
           {student ? 'Update' : 'Save'} Student
         </button>

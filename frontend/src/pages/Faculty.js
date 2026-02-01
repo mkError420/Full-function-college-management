@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { facultyAPI, departmentsAPI } from '../services/api';
-import { GraduationCap, Plus, Edit, Trash2, Search, Mail, Phone } from 'lucide-react';
+import { GraduationCap, Plus, Edit, Trash2, Search, Mail, Phone, Calendar } from 'lucide-react';
 
 const Faculty = () => {
   const [faculty, setFaculty] = useState([]);
@@ -114,132 +114,130 @@ const Faculty = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-secondary-900">Faculty Management</h1>
-        <button className="btn btn-primary flex items-center" onClick={handleAddFaculty}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Faculty
-        </button>
-      </div>
-
-      {/* Search */}
-      <div className="bg-white rounded-lg shadow p-4">
-        <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-secondary-400" />
-          <input
-            type="text"
-            placeholder="Search faculty..."
-            className="input pl-10"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+    <div className="min-h-screen bg-gray-50">
+      <div className="px-1 sm:px-2 lg:px-3">
+        {/* Header Section */}
+        <div className="bg-gradient-to-r from-primary-600 to-primary-800 rounded shadow p-2 text-white mb-2">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-base sm:text-lg font-bold">Faculty Management</h1>
+              <p className="text-primary-100 text-xs">Manage faculty members</p>
+            </div>
+            <button className="bg-white/20 backdrop-blur-sm rounded px-3 py-1 text-white hover:bg-white/30 transition-colors flex items-center" onClick={handleAddFaculty}>
+              <Plus className="h-3 w-3 mr-1" />
+              Add Faculty
+            </button>
+          </div>
         </div>
-      </div>
 
-      {/* Faculty Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredFaculty.map(member => {
-          const department = departments.find(dept => dept.id == member.department_id);
-          return (
-            <div key={member.id} className="card">
-              <div className="card-body">
-                <div className="flex items-center mb-4">
-                  <div className="h-12 w-12 bg-primary-500 rounded-full flex items-center justify-center">
-                    <span className="text-white font-semibold">
+        {/* Search */}
+        <div className="bg-white rounded shadow p-2 mb-2">
+          <div className="relative">
+            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-secondary-400" />
+            <input
+              type="text"
+              placeholder="Search faculty..."
+              className="input pl-7 text-xs"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+        </div>
+
+        {/* Faculty Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+          {filteredFaculty.map(member => {
+            const department = departments.find(dept => dept.id == member.department_id);
+            return (
+              <div key={member.id} className="bg-white rounded shadow hover:shadow-md transition-shadow p-3 border border-secondary-100">
+                <div className="flex items-center mb-2">
+                  <div className="h-8 w-8 bg-primary-500 rounded-full flex items-center justify-center">
+                    <span className="text-white font-semibold text-xs">
                       {member.first_name.charAt(0)}{member.last_name.charAt(0)}
                     </span>
                   </div>
-                  <div className="ml-4">
-                    <h3 className="font-semibold text-secondary-900">
+                  <div className="ml-2">
+                    <h3 className="font-semibold text-secondary-900 text-sm">
                       {member.first_name} {member.last_name}
                     </h3>
-                    <p className="text-sm text-secondary-500">{member.designation}</p>
+                    <p className="text-xs text-secondary-500">{member.designation}</p>
                   </div>
                 </div>
                 
-                <div className="space-y-2 text-sm">
+                <div className="space-y-1 text-xs">
                   <div className="flex items-center text-secondary-600">
-                    <GraduationCap className="h-4 w-4 mr-2" />
+                    <GraduationCap className="h-3 w-3 mr-1" />
                     {department ? department.department_name : 'Unknown Department'}
                   </div>
                   {member.email && (
                     <div className="flex items-center text-secondary-600">
-                      <Mail className="h-4 w-4 mr-2" />
+                      <Mail className="h-3 w-3 mr-1" />
                       {member.email}
                     </div>
                   )}
                   {member.phone && (
                     <div className="flex items-center text-secondary-600">
-                      <Phone className="h-4 w-4 mr-2" />
+                      <Phone className="h-3 w-3 mr-1" />
                       {member.phone}
                     </div>
                   )}
+                  <div className="flex items-center text-secondary-600">
+                    <Calendar className="h-3 w-3 mr-1" />
+                    Joined: {member.joining_date}
+                  </div>
                 </div>
 
-                {member.qualification && (
-                  <div className="mt-3 pt-3 border-t border-secondary-200">
-                    <p className="text-sm text-secondary-600">
-                      <strong>Qualification:</strong> {member.qualification}
-                    </p>
-                  </div>
-                )}
-
-                <div className="flex justify-end space-x-2 mt-4">
+                <div className="flex justify-end space-x-1 mt-3">
                   <button 
-                    className="text-blue-600 hover:text-blue-800"
+                    className="text-blue-600 hover:text-blue-800 p-1"
                     onClick={() => handleEditFaculty(member)}
                   >
-                    <Edit className="h-4 w-4" />
+                    <Edit className="h-3 w-3" />
                   </button>
                   <button 
-                    className="text-red-600 hover:text-red-800"
+                    className="text-red-600 hover:text-red-800 p-1"
                     onClick={() => handleDeleteFaculty(member.id)}
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-3 w-3" />
                   </button>
                 </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {filteredFaculty.length === 0 && (
-        <div className="text-center py-12">
-          <GraduationCap className="h-12 w-12 text-secondary-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-secondary-900 mb-2">No faculty found</h3>
-          <p className="text-secondary-500">Get started by adding a new faculty member.</p>
+            );
+          })}
         </div>
-      )}
 
-      {/* Faculty Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-bold mb-4">
-              {editingFaculty ? 'Edit Faculty Member' : 'Add New Faculty Member'}
-            </h2>
-            
-            <FacultyForm 
-              faculty={editingFaculty}
-              departments={departments}
-              onSave={handleSaveFaculty}
-              onCancel={() => setShowModal(false)}
-            />
+        {filteredFaculty.length === 0 && (
+          <div className="text-center py-8">
+            <GraduationCap className="h-8 w-8 text-secondary-400 mx-auto mb-2" />
+            <h3 className="text-sm font-medium text-secondary-900 mb-1">No faculty found</h3>
+            <p className="text-xs text-secondary-500">Get started by adding a new faculty member.</p>
           </div>
-        </div>
-      )}
+        )}
+
+        {/* Faculty Modal */}
+        {showModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-4 w-full max-w-md max-h-[90vh] overflow-y-auto">
+              <h2 className="text-lg font-bold mb-3">
+                {editingFaculty ? 'Edit Faculty' : 'Add New Faculty'}
+              </h2>
+              
+              <FacultyForm 
+                faculty={editingFaculty}
+                departments={departments}
+                onSave={handleSaveFaculty}
+                onCancel={() => setShowModal(false)}
+              />
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
 
 // Faculty Form Component
 const FacultyForm = ({ faculty, departments, onSave, onCancel }) => {
-  console.log('FacultyForm props:', { faculty, departments });
-  console.log('Departments length:', departments?.length || 0);
-  console.log('Departments data:', departments);
-  
   const [formData, setFormData] = useState({
     first_name: faculty?.first_name || '',
     last_name: faculty?.last_name || '',
@@ -248,7 +246,7 @@ const FacultyForm = ({ faculty, departments, onSave, onCancel }) => {
     department_id: faculty?.department_id || '',
     designation: faculty?.designation || '',
     qualification: faculty?.qualification || '',
-    address: faculty?.address || ''
+    joining_date: faculty?.joining_date || ''
   });
 
   // Update form data when faculty prop changes (for editing)
@@ -261,152 +259,143 @@ const FacultyForm = ({ faculty, departments, onSave, onCancel }) => {
       department_id: faculty?.department_id || '',
       designation: faculty?.designation || '',
       qualification: faculty?.qualification || '',
-      address: faculty?.address || ''
+      joining_date: faculty?.joining_date || ''
     });
   }, [faculty]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Form submitted with data:', formData);
-    console.log('Department ID being saved:', formData.department_id);
     onSave(formData);
   };
 
   const handleChange = (e) => {
-    console.log('Form field changed:', e.target.name, e.target.value);
-    const newFormData = {
+    setFormData({
       ...formData,
       [e.target.name]: e.target.value
-    };
-    console.log('New form data:', newFormData);
-    setFormData(newFormData);
+    });
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <form onSubmit={handleSubmit} className="space-y-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
         <div>
-          <label className="block text-sm font-medium text-secondary-700 mb-1">First Name</label>
+          <label className="block text-xs font-medium text-secondary-700 mb-1">First Name</label>
           <input
             type="text"
             name="first_name"
             value={formData.first_name}
             onChange={handleChange}
-            className="input"
+            className="input text-xs"
             placeholder="e.g., John"
             required
           />
         </div>
         
         <div>
-          <label className="block text-sm font-medium text-secondary-700 mb-1">Last Name</label>
+          <label className="block text-xs font-medium text-secondary-700 mb-1">Last Name</label>
           <input
             type="text"
             name="last_name"
             value={formData.last_name}
             onChange={handleChange}
-            className="input"
+            className="input text-xs"
             placeholder="e.g., Doe"
             required
           />
         </div>
         
         <div>
-          <label className="block text-sm font-medium text-secondary-700 mb-1">Email</label>
+          <label className="block text-xs font-medium text-secondary-700 mb-1">Email</label>
           <input
             type="email"
             name="email"
             value={formData.email}
             onChange={handleChange}
-            className="input"
+            className="input text-xs"
             placeholder="e.g., john.doe@college.edu"
             required
           />
         </div>
         
         <div>
-          <label className="block text-sm font-medium text-secondary-700 mb-1">Phone</label>
+          <label className="block text-xs font-medium text-secondary-700 mb-1">Phone</label>
           <input
             type="tel"
             name="phone"
             value={formData.phone}
             onChange={handleChange}
-            className="input"
+            className="input text-xs"
             placeholder="e.g., +1234567890"
           />
         </div>
         
         <div>
-          <label className="block text-sm font-medium text-secondary-700 mb-1">Department</label>
+          <label className="block text-xs font-medium text-secondary-700 mb-1">Department</label>
           <select
             name="department_id"
             value={formData.department_id}
             onChange={handleChange}
-            className="input"
+            className="input text-xs"
             required
           >
             <option value="">Select Department</option>
-            {departments.map(dept => {
-              console.log('Rendering department option:', dept);
-              return (
-                <option key={dept.id} value={dept.id}>
-                  {dept.department_name}
-                </option>
-              );
-            })}
+            {departments.map(dept => (
+              <option key={dept.id} value={dept.id}>
+                {dept.department_name}
+              </option>
+            ))}
           </select>
-          {departments.length === 0 && <p className="text-red-500 text-sm mt-1">No departments available</p>}
         </div>
         
         <div>
-          <label className="block text-sm font-medium text-secondary-700 mb-1">Designation</label>
+          <label className="block text-xs font-medium text-secondary-700 mb-1">Designation</label>
           <input
             type="text"
             name="designation"
             value={formData.designation}
             onChange={handleChange}
-            className="input"
+            className="input text-xs"
             placeholder="e.g., Professor"
+            required
+          />
+        </div>
+        
+        <div>
+          <label className="block text-xs font-medium text-secondary-700 mb-1">Qualification</label>
+          <input
+            type="text"
+            name="qualification"
+            value={formData.qualification}
+            onChange={handleChange}
+            className="input text-xs"
+            placeholder="e.g., PhD in Medicine"
+          />
+        </div>
+        
+        <div>
+          <label className="block text-xs font-medium text-secondary-700 mb-1">Joining Date</label>
+          <input
+            type="date"
+            name="joining_date"
+            value={formData.joining_date}
+            onChange={handleChange}
+            className="input text-xs"
             required
           />
         </div>
       </div>
       
-      <div>
-        <label className="block text-sm font-medium text-secondary-700 mb-1">Qualification</label>
-        <input
-          type="text"
-          name="qualification"
-          value={formData.qualification}
-          onChange={handleChange}
-          className="input"
-          placeholder="e.g., PhD in Computer Science"
-        />
-      </div>
-      
-      <div>
-        <label className="block text-sm font-medium text-secondary-700 mb-1">Address</label>
-        <textarea
-          name="address"
-          value={formData.address}
-          onChange={handleChange}
-          className="input"
-          rows="3"
-          placeholder="Faculty member address..."
-        />
-      </div>
-      
-      <div className="flex justify-end space-x-3 pt-4">
+      <div className="flex justify-end space-x-2 pt-2">
         <button
           type="button"
           onClick={onCancel}
-          className="btn btn-secondary"
+          className="btn btn-secondary text-xs px-3 py-1"
         >
           Cancel
         </button>
         <button
           type="submit"
-          className="btn btn-primary"
+          className="btn btn-primary text-xs px-3 py-1"
         >
           {faculty ? 'Update' : 'Save'} Faculty
         </button>

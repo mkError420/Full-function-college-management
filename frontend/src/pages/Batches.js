@@ -57,7 +57,7 @@ const Batches = () => {
 
   const getStatusBadge = (status) => {
     const styles = {
-      active: 'badge-success',
+      active: 'badge-error',
       completed: 'badge-info',
       suspended: 'badge-warning'
     };
