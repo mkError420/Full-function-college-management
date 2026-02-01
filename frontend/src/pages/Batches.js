@@ -32,7 +32,7 @@ const Batches = () => {
       const response = await departmentsAPI.getAll();
       setDepartments(response.data);
     } catch (error) {
-      console.error('Error fetching departments:', error);
+      console.error('Error fetching departments for batches:', error);
     }
   };
 
@@ -153,32 +153,35 @@ const Batches = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredBatches.map(batch => (
-                <tr key={batch.id}>
-                  <td className="font-medium">{batch.batch_name}</td>
-                  <td>{batch.batch_code}</td>
-                  <td>{batch.department_name}</td>
-                  <td>{batch.start_date} to {batch.end_date}</td>
-                  <td>{batch.strength}</td>
-                  <td>{getStatusBadge(batch.status)}</td>
-                  <td>
-                    <div className="flex space-x-2">
-                      <button 
-                        className="text-blue-600 hover:text-blue-800"
-                        onClick={() => handleEditBatch(batch)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </button>
-                      <button 
-                        className="text-red-600 hover:text-red-800"
-                        onClick={() => handleDeleteBatch(batch.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              {filteredBatches.map(batch => {
+                const department = departments.find(dept => dept.id == batch.department_id);
+                return (
+                  <tr key={batch.id}>
+                    <td className="font-medium">{batch.batch_name}</td>
+                    <td>{batch.batch_code}</td>
+                    <td>{department ? department.department_name : 'Unknown Department'}</td>
+                    <td>{batch.start_date} to {batch.end_date}</td>
+                    <td>{batch.strength}</td>
+                    <td>{getStatusBadge(batch.status)}</td>
+                    <td>
+                      <div className="flex space-x-2">
+                        <button 
+                          className="text-blue-600 hover:text-blue-800"
+                          onClick={() => handleEditBatch(batch)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </button>
+                        <button 
+                          className="text-red-600 hover:text-red-800"
+                          onClick={() => handleDeleteBatch(batch.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -269,6 +272,7 @@ const BatchForm = ({ batch, departments, onSave, onCancel }) => {
         <div>
           <label className="block text-sm font-medium text-secondary-700 mb-1">Department</label>
           <select
+            key={`departments-${departments?.length || 0}`}
             name="department_id"
             value={formData.department_id}
             onChange={handleChange}
@@ -276,12 +280,19 @@ const BatchForm = ({ batch, departments, onSave, onCancel }) => {
             required
           >
             <option value="">Select Department</option>
-            {departments.map(dept => (
-              <option key={dept.id} value={dept.id}>
-                {dept.department_name}
-              </option>
-            ))}
+            {departments && Array.isArray(departments) && departments.length > 0 ? (
+              departments.map(dept => (
+                <option key={dept.id} value={dept.id}>
+                  {dept.department_name}
+                </option>
+              ))
+            ) : (
+              <option value="" disabled>No departments available</option>
+            )}
           </select>
+          {(!departments || !Array.isArray(departments) || departments.length === 0) && (
+            <p className="text-red-500 text-sm mt-1">No departments found. Please add departments first.</p>
+          )}
         </div>
         
         <div>

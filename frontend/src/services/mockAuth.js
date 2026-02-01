@@ -97,5 +97,30 @@ export const mockAuthAPI = {
         message: 'No user found'
       }
     };
+  },
+
+  updateProfile: async (profileData) => {
+    await new Promise(resolve => setTimeout(resolve, 800));
+    const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+    
+    // Update user in localStorage
+    currentUser.email = profileData.email;
+    currentUser.details = {
+      ...currentUser.details,
+      phone: profileData.phone,
+      address: profileData.address,
+      date_of_birth: profileData.date_of_birth
+    };
+    
+    // Save updated user to localStorage
+    localStorage.setItem('user', JSON.stringify(currentUser));
+    
+    return { 
+      data: { 
+        success: true, 
+        message: 'Profile updated successfully',
+        user: currentUser
+      } 
+    };
   }
 };

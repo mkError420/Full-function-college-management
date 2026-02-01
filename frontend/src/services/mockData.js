@@ -266,9 +266,11 @@ export const mockAPI = {
     
     create: async (batchData) => {
       await new Promise(resolve => setTimeout(resolve, 800));
+      const department = mockData.departments.find(dept => dept.id == batchData.department_id);
       const newBatch = {
         id: Math.max(...mockData.batches.map(b => b.id), 0) + 1,
         ...batchData,
+        department_name: department ? department.department_name : 'Unknown Department',
         created_at: new Date().toISOString().split('T')[0]
       };
       mockData.batches.push(newBatch);
@@ -280,7 +282,12 @@ export const mockAPI = {
       await new Promise(resolve => setTimeout(resolve, 800));
       const index = mockData.batches.findIndex(b => b.id == id);
       if (index !== -1) {
-        mockData.batches[index] = { ...mockData.batches[index], ...batchData };
+        const department = mockData.departments.find(dept => dept.id == batchData.department_id);
+        mockData.batches[index] = { 
+          ...mockData.batches[index], 
+          ...batchData,
+          department_name: department ? department.department_name : 'Unknown Department'
+        };
         saveData();
         return { data: { success: true, message: 'Batch updated successfully', batch: mockData.batches[index] } };
       }

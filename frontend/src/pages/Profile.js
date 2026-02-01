@@ -4,7 +4,7 @@ import { authAPI } from '../services/api';
 import { User, Mail, Phone, MapPin, Calendar, Award, BookOpen, Edit2, Save, X } from 'lucide-react';
 
 const Profile = () => {
-  const { user } = useAuth();
+  const { user, updateProfile } = useAuth();
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -44,11 +44,23 @@ const Profile = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      // Update profile logic would go here
-      console.log('Saving profile:', formData);
-      setEditing(false);
+      const response = await updateProfile(formData);
+      if (response.success) {
+        // Update the profile data with the response
+        setProfileData(response.user);
+        setFormData({
+          email: response.user.email,
+          phone: response.user.details?.phone || '',
+          address: response.user.details?.address || '',
+          date_of_birth: response.user.details?.date_of_birth || '',
+        });
+        setEditing(false);
+        // Show success message (you could add a toast notification here)
+        alert('Profile updated successfully!');
+      }
     } catch (error) {
       console.error('Error saving profile:', error);
+      alert('Error updating profile. Please try again.');
     } finally {
       setSaving(false);
     }

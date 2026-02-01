@@ -97,6 +97,23 @@ export const AuthProvider = ({ children }) => {
     dispatch({ type: 'LOGOUT' });
   };
 
+  const updateProfile = async (profileData) => {
+    try {
+      const response = await authAPI.updateProfile(profileData);
+      if (response.data.success) {
+        dispatch({
+          type: 'LOGIN_SUCCESS',
+          payload: response.data,
+        });
+        return response.data;
+      } else {
+        throw new Error(response.data.message || 'Profile update failed');
+      }
+    } catch (error) {
+      throw error;
+    }
+  };
+
   const register = async (userData) => {
     try {
       const response = await authAPI.register(userData);
@@ -120,6 +137,7 @@ export const AuthProvider = ({ children }) => {
     login,
     logout,
     register,
+    updateProfile,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

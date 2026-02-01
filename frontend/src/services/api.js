@@ -45,6 +45,7 @@ export const authAPI = {
   login: mockAuthAPI.login,
   register: mockAuthAPI.register,
   getProfile: mockAuthAPI.getProfile,
+  updateProfile: mockAuthAPI.updateProfile,
 };
 
 // Batches API - Using Mock
