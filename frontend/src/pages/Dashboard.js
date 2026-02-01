@@ -213,26 +213,34 @@ const Dashboard = () => {
   };
 
   const StatCard = ({ title, value, icon: Icon, color, change, changeType }) => (
-    <div className="bg-white rounded-lg shadow p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-secondary-600">{title}</p>
-          <p className="text-2xl font-semibold text-secondary-900 mt-1">{value}</p>
-          <div className="flex items-center mt-2">
-            {changeType === 'increase' && (
-              <span className="text-green-600 text-sm font-medium">{change}</span>
-            )}
-            {changeType === 'decrease' && (
-              <span className="text-red-600 text-sm font-medium">{change}</span>
-            )}
-            {changeType === 'neutral' && (
-              <span className="text-secondary-500 text-sm font-medium">{change}</span>
-            )}
-          </div>
+    <div className="bg-white rounded shadow-sm hover:shadow transition-shadow duration-300 p-1.5 border border-secondary-100">
+      <div className="flex items-center justify-between mb-1">
+        <div className={`${color} rounded p-0.5 shadow-sm`}>
+          <Icon className="h-2.5 w-2.5 text-white" />
         </div>
-        <div className={`${color} rounded-lg p-3`}>
-          <Icon className="h-6 w-6 text-white" />
+        <div className="text-right">
+          {changeType === 'increase' && (
+            <span className="inline-flex items-center px-0.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+              <TrendingUp className="h-1.5 w-1.5 mr-0.5" />
+              {change}
+            </span>
+          )}
+          {changeType === 'decrease' && (
+            <span className="inline-flex items-center px-0.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+              <TrendingUp className="h-1.5 w-1.5 mr-0.5 rotate-180" />
+              {change}
+            </span>
+          )}
+          {changeType === 'neutral' && (
+            <span className="inline-flex items-center px-0.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+              {change}
+            </span>
+          )}
         </div>
+      </div>
+      <div>
+        <p className="text-xs font-medium text-secondary-600 mb-0.5">{title}</p>
+        <p className="text-xs font-bold text-secondary-900">{value}</p>
       </div>
     </div>
   );
@@ -246,85 +254,101 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-primary-600 to-primary-800 rounded-lg shadow-lg p-6 text-white">
-        <h1 className="text-3xl font-bold mb-2">
-          {getWelcomeMessage()}, {user?.details?.first_name || user?.username}!
-        </h1>
-        <p className="text-primary-100">
-          Welcome back to the Medical College Management System
-        </p>
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      <div className="px-1 sm:px-2 lg:px-3">
+        {/* Welcome Section - Minimal */}
+        <div className="bg-gradient-to-r from-primary-600 to-primary-800 rounded shadow p-2 text-white mb-2">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-base sm:text-lg font-bold">
+                {getWelcomeMessage()}, {user?.details?.first_name || user?.username}!
+              </h1>
+              <p className="text-primary-100 text-xs">
+                Medical College Management System
+              </p>
+            </div>
+            <div className="bg-white/20 backdrop-blur-sm rounded px-2 py-1">
+              <p className="text-xs font-medium capitalize">{user?.role}</p>
+            </div>
+          </div>
+        </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {getRoleSpecificStats().map((stat, index) => (
-          <StatCard key={index} {...stat} />
-        ))}
-      </div>
+        {/* Single Row Stats - Full Width */}
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-1 mb-2">
+          {getRoleSpecificStats().map((stat, index) => (
+            <StatCard key={index} {...stat} />
+          ))}
+        </div>
 
-      {/* Quick Actions */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-lg font-semibold text-secondary-900 mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {user?.role === 'admin' && (
-            <>
-              <button className="p-4 border border-secondary-200 rounded-lg hover:bg-secondary-50 transition-colors text-left">
-                <Users className="h-8 w-8 text-blue-500 mb-2" />
-                <h3 className="font-medium text-secondary-900">Add Student</h3>
-                <p className="text-sm text-secondary-500">Register a new student</p>
-              </button>
-              <button className="p-4 border border-secondary-200 rounded-lg hover:bg-secondary-50 transition-colors text-left">
-                <GraduationCap className="h-8 w-8 text-green-500 mb-2" />
-                <h3 className="font-medium text-secondary-900">Add Faculty</h3>
-                <p className="text-sm text-secondary-500">Hire new faculty member</p>
-              </button>
-              <button className="p-4 border border-secondary-200 rounded-lg hover:bg-secondary-50 transition-colors text-left">
-                <BookOpen className="h-8 w-8 text-purple-500 mb-2" />
-                <h3 className="font-medium text-secondary-900">Create Subject</h3>
-                <p className="text-sm text-secondary-500">Add new subject</p>
-              </button>
-            </>
-          )}
-          {user?.role === 'faculty' && (
-            <>
-              <button className="p-4 border border-secondary-200 rounded-lg hover:bg-secondary-50 transition-colors text-left">
-                <Calendar className="h-8 w-8 text-blue-500 mb-2" />
-                <h3 className="font-medium text-secondary-900">Mark Attendance</h3>
-                <p className="text-sm text-secondary-500">Take class attendance</p>
-              </button>
-              <button className="p-4 border border-secondary-200 rounded-lg hover:bg-secondary-50 transition-colors text-left">
-                <Award className="h-8 w-8 text-green-500 mb-2" />
-                <h3 className="font-medium text-secondary-900">Add Marks</h3>
-                <p className="text-sm text-secondary-500">Enter exam results</p>
-              </button>
-              <button className="p-4 border border-secondary-200 rounded-lg hover:bg-secondary-50 transition-colors text-left">
-                <BookOpen className="h-8 w-8 text-purple-500 mb-2" />
-                <h3 className="font-medium text-secondary-900">View Subjects</h3>
-                <p className="text-sm text-secondary-500">Manage your subjects</p>
-              </button>
-            </>
-          )}
-          {user?.role === 'student' && (
-            <>
-              <button className="p-4 border border-secondary-200 rounded-lg hover:bg-secondary-50 transition-colors text-left">
-                <Calendar className="h-8 w-8 text-blue-500 mb-2" />
-                <h3 className="font-medium text-secondary-900">View Attendance</h3>
-                <p className="text-sm text-secondary-500">Check your attendance</p>
-              </button>
-              <button className="p-4 border border-secondary-200 rounded-lg hover:bg-secondary-50 transition-colors text-left">
-                <Award className="h-8 w-8 text-green-500 mb-2" />
-                <h3 className="font-medium text-secondary-900">View Marks</h3>
-                <p className="text-sm text-secondary-500">Check your results</p>
-              </button>
-              <button className="p-4 border border-secondary-200 rounded-lg hover:bg-secondary-50 transition-colors text-left">
-                <BookOpen className="h-8 w-8 text-purple-500 mb-2" />
-                <h3 className="font-medium text-secondary-900">Subjects</h3>
-                <p className="text-sm text-secondary-500">View your subjects</p>
-              </button>
-            </>
-          )}
+        {/* Quick Actions - Full Width Compact */}
+        <div className="bg-white rounded shadow p-2">
+          <h2 className="text-xs font-bold text-secondary-900 mb-1">Quick Actions</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-1">
+            {user?.role === 'admin' && (
+              <>
+                <button className="group p-1.5 border border-secondary-200 rounded hover:bg-secondary-50 transition-all duration-200 text-left">
+                  <div className="flex items-center">
+                    <div className="bg-blue-100 group-hover:bg-blue-200 rounded p-0.5 transition-colors mr-1">
+                      <Users className="h-3 w-3 text-blue-600" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-medium text-secondary-900 text-xs">Add Student</h3>
+                    </div>
+                  </div>
+                </button>
+                <button className="group p-1.5 border border-secondary-200 rounded hover:bg-secondary-50 transition-all duration-200 text-left">
+                  <div className="flex items-center">
+                    <div className="bg-green-100 group-hover:bg-green-200 rounded p-0.5 transition-colors mr-1">
+                      <GraduationCap className="h-3 w-3 text-green-600" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-medium text-secondary-900 text-xs">Add Faculty</h3>
+                    </div>
+                  </div>
+                </button>
+                <button className="group p-1.5 border border-secondary-200 rounded hover:bg-secondary-50 transition-all duration-200 text-left">
+                  <div className="flex items-center">
+                    <div className="bg-purple-100 group-hover:bg-purple-200 rounded p-0.5 transition-colors mr-1">
+                      <Building className="h-3 w-3 text-purple-600" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-medium text-secondary-900 text-xs">Departments</h3>
+                    </div>
+                  </div>
+                </button>
+                <button className="group p-1.5 border border-secondary-200 rounded hover:bg-secondary-50 transition-all duration-200 text-left">
+                  <div className="flex items-center">
+                    <div className="bg-indigo-100 group-hover:bg-indigo-200 rounded p-0.5 transition-colors mr-1">
+                      <Calendar className="h-3 w-3 text-indigo-600" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-medium text-secondary-900 text-xs">Reports</h3>
+                    </div>
+                  </div>
+                </button>
+                <button className="group p-1.5 border border-secondary-200 rounded hover:bg-secondary-50 transition-all duration-200 text-left">
+                  <div className="flex items-center">
+                    <div className="bg-pink-100 group-hover:bg-pink-200 rounded p-0.5 transition-colors mr-1">
+                      <BookOpen className="h-3 w-3 text-pink-600" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-medium text-secondary-900 text-xs">Subjects</h3>
+                    </div>
+                  </div>
+                </button>
+                <button className="group p-1.5 border border-secondary-200 rounded hover:bg-secondary-50 transition-all duration-200 text-left">
+                  <div className="flex items-center">
+                    <div className="bg-orange-100 group-hover:bg-orange-200 rounded p-0.5 transition-colors mr-1">
+                      <Activity className="h-3 w-3 text-orange-600" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-medium text-secondary-900 text-xs">Attendance</h3>
+                    </div>
+                  </div>
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>
