@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { studentsAPI, facultyAPI, attendanceAPI, marksAPI, departmentsAPI } from '../services/api';
+import { studentsAPI, facultyAPI, attendanceAPI, marksAPI, departmentsAPI, batchesAPI, subjectsAPI } from '../services/api';
 import {
   Users,
   GraduationCap,
@@ -24,27 +24,48 @@ const Dashboard = () => {
   const fetchDashboardStats = async () => {
     try {
       setLoading(true);
+      console.log('Fetching dashboard stats...');
       const responses = await Promise.all([
         studentsAPI.getAll(),
         facultyAPI.getAll(),
         departmentsAPI.getAll(),
+        batchesAPI.getAll(),
+        subjectsAPI.getAll(),
         attendanceAPI.getReport(),
         marksAPI.getReport(),
       ]);
 
-      const studentsData = responses[0].data.success ? responses[0].data.data : [];
-      const facultyData = responses[1].data.success ? responses[1].data.data : [];
-      const departmentsData = responses[2].data.success ? responses[2].data.data : [];
-      const attendanceData = responses[3].data.success ? responses[3].data.data : {};
-      const marksData = responses[4].data.success ? responses[4].data.data : {};
+      console.log('Dashboard API responses:', responses);
+
+      const studentsData = responses[0].data || [];
+      const facultyData = responses[1].data || [];
+      const departmentsData = responses[2].data || [];
+      const batchesData = responses[3].data || [];
+      const subjectsData = responses[4].data || [];
+      const attendanceData = responses[5].data || {};
+      const marksData = responses[6].data || {};
+
+      console.log('Dashboard processed data:', {
+        studentsData,
+        facultyData,
+        departmentsData,
+        batchesData,
+        subjectsData,
+        attendanceData,
+        marksData
+      });
 
       setStats({
         totalStudents: studentsData.length,
         totalFaculty: facultyData.length,
         totalDepartments: departmentsData.length,
+        totalBatches: batchesData.length,
+        totalSubjects: subjectsData.length,
         attendanceRate: attendanceData.attendance_percentage || 0,
         averageMarks: marksData.percentage || 0,
         activeStudents: studentsData.filter(s => s.status === 'active').length,
+        totalAttendance: attendanceData.total_records || 0,
+        totalMarks: marksData.total_records || 0,
       });
     } catch (error) {
       console.error('Error fetching dashboard stats:', error);
@@ -89,14 +110,31 @@ const Dashboard = () => {
             changeType: 'neutral',
           },
           {
-            title: 'Active Students',
-            value: stats.activeStudents || 0,
-            icon: Activity,
-            color: 'bg-orange-500',
+            title: 'Batches',
+            value: stats.totalBatches || 0,
+            icon: Calendar,
+            color: 'bg-indigo-500',
+            change: '+2',
+            changeType: 'increase',
+          },
+          {
+            title: 'Subjects',
+            value: stats.totalSubjects || 0,
+            icon: BookOpen,
+            color: 'bg-pink-500',
             change: '+8%',
             changeType: 'increase',
           },
+          {
+            title: 'Attendance Rate',
+            value: `${stats.attendanceRate || 0}%`,
+            icon: Activity,
+            color: 'bg-orange-500',
+            change: '+3%',
+            changeType: 'increase',
+          },
         ];
+
       case 'faculty':
         return [
           {
@@ -132,6 +170,7 @@ const Dashboard = () => {
             changeType: 'increase',
           },
         ];
+
       case 'student':
         return [
           {
@@ -167,6 +206,7 @@ const Dashboard = () => {
             changeType: 'neutral',
           },
         ];
+
       default:
         return [];
     }
