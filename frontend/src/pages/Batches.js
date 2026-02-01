@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { batchesAPI, departmentsAPI } from '../services/api';
-import { Calendar, Plus, Edit, Trash2, Search, Users } from 'lucide-react';
+import { Calendar, Plus, Edit, Trash2, Search, Users, Filter, Building } from 'lucide-react';
 
 const Batches = () => {
   const [batches, setBatches] = useState([]);
@@ -132,122 +132,130 @@ const Batches = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-secondary-900">Batches Management</h1>
-        <button className="btn btn-primary flex items-center" onClick={handleAddBatch}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Batch
-        </button>
-      </div>
-
-      {/* Filters */}
-      <div className="bg-white rounded-lg shadow p-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-secondary-400" />
-            <input
-              type="text"
-              placeholder="Search batches..."
-              className="input pl-10"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <select
-            className="input"
-            value={filterDepartment}
-            onChange={(e) => setFilterDepartment(e.target.value)}
-          >
-            <option value="">All Departments</option>
-            {departments.map(dept => (
-              <option key={dept.id} value={dept.id}>
-                {dept.department_name}
-              </option>
-            ))}
-          </select>
-          <div className="flex items-center text-sm text-secondary-600">
-            <Users className="h-4 w-4 mr-2" />
-            {filteredBatches.length} of {batches.length} batches
+    <div className="min-h-screen bg-gray-50">
+      <div className="px-1 sm:px-2 lg:px-3">
+        {/* Header Section */}
+        <div className="bg-gradient-to-r from-primary-600 to-primary-800 rounded shadow p-2 text-white mb-2">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-base sm:text-lg font-bold">Batches Management</h1>
+              <p className="text-primary-100 text-xs">Manage academic batches</p>
+            </div>
+            <button className="bg-white/20 backdrop-blur-sm rounded px-3 py-1 text-white hover:bg-white/30 transition-colors flex items-center" onClick={handleAddBatch}>
+              <Plus className="h-3 w-3 mr-1" />
+              Add Batch
+            </button>
           </div>
         </div>
-      </div>
 
-      {/* Batches Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Batch Name</th>
-                <th>Code</th>
-                <th>Department</th>
-                <th>Duration</th>
-                <th>Strength</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredBatches.map(batch => {
-                const department = departments.find(dept => dept.id == batch.department_id);
-                return (
-                  <tr key={batch.id}>
-                    <td className="font-medium">{batch.batch_name}</td>
-                    <td>{batch.batch_code}</td>
-                    <td>{department ? department.department_name : 'Unknown Department'}</td>
-                    <td>{batch.start_date} to {batch.end_date}</td>
-                    <td>{batch.strength}</td>
-                    <td>{getStatusBadge(batch.status)}</td>
-                    <td>
-                      <div className="flex space-x-2">
-                        <button 
-                          className="text-blue-600 hover:text-blue-800"
-                          onClick={() => handleEditBatch(batch)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </button>
-                        <button 
-                          className="text-red-600 hover:text-red-800"
-                          onClick={() => handleDeleteBatch(batch.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {filteredBatches.length === 0 && (
-        <div className="text-center py-12">
-          <Calendar className="h-12 w-12 text-secondary-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-secondary-900 mb-2">No batches found</h3>
-          <p className="text-secondary-500">Get started by adding a new batch.</p>
-        </div>
-      )}
-
-      {/* Batch Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-bold mb-4">
-              {editingBatch ? 'Edit Batch' : 'Add New Batch'}
-            </h2>
-            
-            <BatchForm 
-              batch={editingBatch}
-              departments={departments}
-              onSave={handleSaveBatch}
-              onCancel={() => setShowModal(false)}
-            />
+        {/* Filters */}
+        <div className="bg-white rounded shadow p-2 mb-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+            <div className="relative">
+              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-secondary-400" />
+              <input
+                type="text"
+                placeholder="Search batches..."
+                className="input pl-7 text-xs"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <select
+              className="input text-xs"
+              value={filterDepartment}
+              onChange={(e) => setFilterDepartment(e.target.value)}
+            >
+              <option value="">All Departments</option>
+              {departments.map(dept => (
+                <option key={dept.id} value={dept.id}>
+                  {dept.department_name}
+                </option>
+              ))}
+            </select>
+            <div className="flex items-center text-xs text-secondary-600">
+              <Filter className="h-3 w-3 mr-1" />
+              {filteredBatches.length} of {batches.length} batches
+            </div>
           </div>
         </div>
-      )}
+
+        {/* Batches Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+          {filteredBatches.map(batch => (
+            <div key={batch.id} className="bg-white rounded shadow hover:shadow-md transition-shadow p-3 border border-secondary-100">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center">
+                  <div className="h-8 w-8 bg-primary-500 rounded-lg flex items-center justify-center">
+                    <Calendar className="h-4 w-4 text-white" />
+                  </div>
+                  <div className="ml-2">
+                    <h3 className="font-semibold text-secondary-900 text-sm">{batch.batch_name}</h3>
+                    <p className="text-xs text-secondary-500">{batch.batch_code}</p>
+                  </div>
+                </div>
+                {getStatusBadge(batch.status)}
+              </div>
+              
+              <div className="space-y-1 text-xs">
+                <div className="flex items-center text-secondary-600">
+                  <Building className="h-3 w-3 mr-1" />
+                  {batch.department_name}
+                </div>
+                <div className="flex items-center text-secondary-600">
+                  <Users className="h-3 w-3 mr-1" />
+                  <span className="font-medium">Strength:</span> {batch.strength}
+                </div>
+                <div className="flex items-center text-secondary-600">
+                  <Calendar className="h-3 w-3 mr-1" />
+                  <span className="font-medium">Duration:</span> {batch.start_date} - {batch.end_date}
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-1 mt-3">
+                <button 
+                  className="text-blue-600 hover:text-blue-800 p-1"
+                  onClick={() => handleEditBatch(batch)}
+                >
+                  <Edit className="h-3 w-3" />
+                </button>
+                <button 
+                  className="text-red-600 hover:text-red-800 p-1"
+                  onClick={() => handleDeleteBatch(batch.id)}
+                >
+                  <Trash2 className="h-3 w-3" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {filteredBatches.length === 0 && (
+          <div className="text-center py-8">
+            <Calendar className="h-8 w-8 text-secondary-400 mx-auto mb-2" />
+            <h3 className="text-sm font-medium text-secondary-900 mb-1">No batches found</h3>
+            <p className="text-xs text-secondary-500">Get started by adding a new batch.</p>
+          </div>
+        )}
+
+        {/* Batch Modal */}
+        {showModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-4 w-full max-w-md max-h-[90vh] overflow-y-auto">
+              <h2 className="text-lg font-bold mb-3">
+                {editingBatch ? 'Edit Batch' : 'Add New Batch'}
+              </h2>
+              
+              <BatchForm 
+                batch={editingBatch}
+                departments={departments}
+                onSave={handleSaveBatch}
+                onCancel={() => setShowModal(false)}
+              />
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
@@ -290,105 +298,59 @@ const BatchForm = ({ batch, departments, onSave, onCancel }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <form onSubmit={handleSubmit} className="space-y-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
         <div>
-          <label className="block text-sm font-medium text-secondary-700 mb-1">Batch Name</label>
+          <label className="block text-xs font-medium text-secondary-700 mb-1">Batch Name</label>
           <input
             type="text"
             name="batch_name"
             value={formData.batch_name}
             onChange={handleChange}
-            className="input"
+            className="input text-xs"
             placeholder="e.g., MBBS 2024"
             required
           />
         </div>
         
         <div>
-          <label className="block text-sm font-medium text-secondary-700 mb-1">Batch Code</label>
+          <label className="block text-xs font-medium text-secondary-700 mb-1">Batch Code</label>
           <input
             type="text"
             name="batch_code"
             value={formData.batch_code}
             onChange={handleChange}
-            className="input"
+            className="input text-xs"
             placeholder="e.g., MBBS2024"
             required
           />
         </div>
         
         <div>
-          <label className="block text-sm font-medium text-secondary-700 mb-1">Department</label>
+          <label className="block text-xs font-medium text-secondary-700 mb-1">Department</label>
           <select
-            key={`departments-${departments?.length || 0}`}
             name="department_id"
             value={formData.department_id}
             onChange={handleChange}
-            className="input"
+            className="input text-xs"
             required
           >
             <option value="">Select Department</option>
-            {departments && Array.isArray(departments) && departments.length > 0 ? (
-              departments.map(dept => (
-                <option key={dept.id} value={dept.id}>
-                  {dept.department_name}
-                </option>
-              ))
-            ) : (
-              <option value="" disabled>No departments available</option>
-            )}
+            {departments.map(dept => (
+              <option key={dept.id} value={dept.id}>
+                {dept.department_name}
+              </option>
+            ))}
           </select>
-          {(!departments || !Array.isArray(departments) || departments.length === 0) && (
-            <p className="text-red-500 text-sm mt-1">No departments found. Please add departments first.</p>
-          )}
         </div>
         
         <div>
-          <label className="block text-sm font-medium text-secondary-700 mb-1">Strength</label>
-          <input
-            type="number"
-            name="strength"
-            value={formData.strength}
-            onChange={handleChange}
-            className="input"
-            placeholder="Number of students"
-            min="1"
-            required
-          />
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-secondary-700 mb-1">Start Date</label>
-          <input
-            type="date"
-            name="start_date"
-            value={formData.start_date}
-            onChange={handleChange}
-            className="input"
-            required
-          />
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-secondary-700 mb-1">End Date</label>
-          <input
-            type="date"
-            name="end_date"
-            value={formData.end_date}
-            onChange={handleChange}
-            className="input"
-            required
-          />
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium text-secondary-700 mb-1">Status</label>
+          <label className="block text-xs font-medium text-secondary-700 mb-1">Status</label>
           <select
             name="status"
             value={formData.status}
             onChange={handleChange}
-            className="input"
+            className="input text-xs"
             required
           >
             <option value="active">Active</option>
@@ -396,19 +358,57 @@ const BatchForm = ({ batch, departments, onSave, onCancel }) => {
             <option value="suspended">Suspended</option>
           </select>
         </div>
+        
+        <div>
+          <label className="block text-xs font-medium text-secondary-700 mb-1">Start Date</label>
+          <input
+            type="date"
+            name="start_date"
+            value={formData.start_date}
+            onChange={handleChange}
+            className="input text-xs"
+            required
+          />
+        </div>
+        
+        <div>
+          <label className="block text-xs font-medium text-secondary-700 mb-1">End Date</label>
+          <input
+            type="date"
+            name="end_date"
+            value={formData.end_date}
+            onChange={handleChange}
+            className="input text-xs"
+            required
+          />
+        </div>
+        
+        <div>
+          <label className="block text-xs font-medium text-secondary-700 mb-1">Strength</label>
+          <input
+            type="number"
+            name="strength"
+            value={formData.strength}
+            onChange={handleChange}
+            className="input text-xs"
+            placeholder="e.g., 50"
+            min="1"
+            required
+          />
+        </div>
       </div>
       
-      <div className="flex justify-end space-x-3 pt-4">
+      <div className="flex justify-end space-x-2 pt-2">
         <button
           type="button"
           onClick={onCancel}
-          className="btn btn-secondary"
+          className="btn btn-secondary text-xs px-3 py-1"
         >
           Cancel
         </button>
         <button
           type="submit"
-          className="btn btn-primary"
+          className="btn btn-primary text-xs px-3 py-1"
         >
           {batch ? 'Update' : 'Save'} Batch
         </button>

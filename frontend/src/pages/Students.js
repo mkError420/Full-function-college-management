@@ -123,125 +123,133 @@ const Students = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-secondary-900">Students Management</h1>
-        <button className="btn btn-primary flex items-center" onClick={handleAddStudent}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Student
-        </button>
-      </div>
-
-      {/* Filters */}
-      <div className="bg-white rounded-lg shadow p-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-secondary-400" />
-            <input
-              type="text"
-              placeholder="Search students..."
-              className="input pl-10"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <select
-            className="input"
-            value={filterDepartment}
-            onChange={(e) => setFilterDepartment(e.target.value)}
-          >
-            <option value="">All Departments</option>
-            {departments.map(dept => (
-              <option key={dept.id} value={dept.id}>
-                {dept.department_name}
-              </option>
-            ))}
-          </select>
-          <div className="flex items-center text-sm text-secondary-600">
-            <Filter className="h-4 w-4 mr-2" />
-            {filteredStudents.length} of {students.length} students
+    <div className="min-h-screen bg-gray-50">
+      <div className="px-1 sm:px-2 lg:px-3">
+        {/* Header Section */}
+        <div className="bg-gradient-to-r from-primary-600 to-primary-800 rounded shadow p-2 text-white mb-2">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-base sm:text-lg font-bold">Students Management</h1>
+              <p className="text-primary-100 text-xs">Manage student records</p>
+            </div>
+            <button className="bg-white/20 backdrop-blur-sm rounded px-3 py-1 text-white hover:bg-white/30 transition-colors flex items-center" onClick={handleAddStudent}>
+              <Plus className="h-3 w-3 mr-1" />
+              Add Student
+            </button>
           </div>
         </div>
-      </div>
 
-      {/* Students Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Roll Number</th>
-                <th>Name</th>
-                <th>Department</th>
-                <th>Batch</th>
-                <th>Semester</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredStudents.map(student => {
-                const department = departments.find(dept => dept.id == student.department_id);
-                const batch = batches.find(b => b.id == student.batch_id);
-                
-                return (
-                  <tr key={student.id}>
-                    <td className="font-medium">{student.roll_number}</td>
-                    <td>{student.first_name} {student.last_name}</td>
-                    <td>{department ? department.department_name : 'Unknown Department'}</td>
-                    <td>{batch ? batch.batch_name : 'Unknown Batch'}</td>
-                    <td>{student.semester}</td>
-                    <td>{getStatusBadge(student.status)}</td>
-                    <td>
-                      <div className="flex space-x-2">
-                        <button 
-                          className="text-blue-600 hover:text-blue-800"
-                          onClick={() => handleEditStudent(student)}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </button>
-                        <button 
-                          className="text-red-600 hover:text-red-800"
-                          onClick={() => handleDeleteStudent(student.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {filteredStudents.length === 0 && (
-        <div className="text-center py-12">
-          <Users className="h-12 w-12 text-secondary-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-secondary-900 mb-2">No students found</h3>
-          <p className="text-secondary-500">Get started by adding a new student.</p>
-        </div>
-      )}
-
-      {/* Student Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-bold mb-4">
-              {editingStudent ? 'Edit Student' : 'Add New Student'}
-            </h2>
-            
-            <StudentForm 
-              student={editingStudent}
-              departments={departments}
-              batches={batches}
-              onSave={handleSaveStudent}
-              onCancel={() => setShowModal(false)}
-            />
+        {/* Filters */}
+        <div className="bg-white rounded shadow p-2 mb-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+            <div className="relative">
+              <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-secondary-400" />
+              <input
+                type="text"
+                placeholder="Search students..."
+                className="input pl-7 text-xs"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <select
+              className="input text-xs"
+              value={filterDepartment}
+              onChange={(e) => setFilterDepartment(e.target.value)}
+            >
+              <option value="">All Departments</option>
+              {departments.map(dept => (
+                <option key={dept.id} value={dept.id}>
+                  {dept.department_name}
+                </option>
+              ))}
+            </select>
+            <div className="flex items-center text-xs text-secondary-600">
+              <Filter className="h-3 w-3 mr-1" />
+              {filteredStudents.length} of {students.length} students
+            </div>
           </div>
         </div>
-      )}
+
+        {/* Students Table */}
+        <div className="bg-white rounded shadow overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="table-auto w-full">
+              <thead>
+                <tr className="bg-gray-50 border-b border-secondary-200">
+                  <th className="px-2 py-1 text-left text-xs font-medium text-secondary-700">Roll Number</th>
+                  <th className="px-2 py-1 text-left text-xs font-medium text-secondary-700">Name</th>
+                  <th className="px-2 py-1 text-left text-xs font-medium text-secondary-700">Department</th>
+                  <th className="px-2 py-1 text-left text-xs font-medium text-secondary-700">Batch</th>
+                  <th className="px-2 py-1 text-left text-xs font-medium text-secondary-700">Semester</th>
+                  <th className="px-2 py-1 text-left text-xs font-medium text-secondary-700">Status</th>
+                  <th className="px-2 py-1 text-left text-xs font-medium text-secondary-700">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-secondary-200">
+                {filteredStudents.map(student => {
+                  const department = departments.find(dept => dept.id == student.department_id);
+                  const batch = batches.find(b => b.id == student.batch_id);
+                  
+                  return (
+                    <tr key={student.id} className="hover:bg-gray-50">
+                      <td className="px-2 py-1 text-xs font-medium">{student.roll_number}</td>
+                      <td className="px-2 py-1 text-xs">{student.first_name} {student.last_name}</td>
+                      <td className="px-2 py-1 text-xs">{department ? department.department_name : 'Unknown Department'}</td>
+                      <td className="px-2 py-1 text-xs">{batch ? batch.batch_name : 'Unknown Batch'}</td>
+                      <td className="px-2 py-1 text-xs">{student.semester}</td>
+                      <td className="px-2 py-1 text-xs">{getStatusBadge(student.status)}</td>
+                      <td className="px-2 py-1 text-xs">
+                        <div className="flex space-x-1">
+                          <button 
+                            className="text-blue-600 hover:text-blue-800 p-1"
+                            onClick={() => handleEditStudent(student)}
+                          >
+                            <Edit className="h-3 w-3" />
+                          </button>
+                          <button 
+                            className="text-red-600 hover:text-red-800 p-1"
+                            onClick={() => handleDeleteStudent(student.id)}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {filteredStudents.length === 0 && (
+          <div className="text-center py-8">
+            <Users className="h-8 w-8 text-secondary-400 mx-auto mb-2" />
+            <h3 className="text-sm font-medium text-secondary-900 mb-1">No students found</h3>
+            <p className="text-xs text-secondary-500">Get started by adding a new student.</p>
+          </div>
+        )}
+
+        {/* Student Modal */}
+        {showModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-4 w-full max-w-md max-h-[90vh] overflow-y-auto">
+              <h2 className="text-lg font-bold mb-3">
+                {editingStudent ? 'Edit Student' : 'Add New Student'}
+              </h2>
+              
+              <StudentForm 
+                student={editingStudent}
+                departments={departments}
+                batches={batches}
+                onSave={handleSaveStudent}
+                onCancel={() => setShowModal(false)}
+              />
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
