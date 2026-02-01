@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { authAPI } from '../services/api';
-import { User, Mail, Phone, MapPin, Calendar, Award, BookOpen, Edit2, Save, X } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Calendar, Award, BookOpen, Edit2, Save, X, Camera } from 'lucide-react';
 
 const Profile = () => {
   const { user, updateProfile } = useAuth();
@@ -10,6 +10,8 @@ const Profile = () => {
   const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState({});
   const [saving, setSaving] = useState(false);
+  const [profileImage, setProfileImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
 
   useEffect(() => {
     fetchProfile();
@@ -20,6 +22,7 @@ const Profile = () => {
       const response = await authAPI.getProfile();
       if (response.data.success) {
         setProfileData(response.data.user);
+        setImagePreview(response.data.user.profile_picture);
         setFormData({
           email: response.data.user.email,
           phone: response.data.user.details?.phone || '',
@@ -44,10 +47,20 @@ const Profile = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const response = await updateProfile(formData);
+      let payload = formData;
+      if (profileImage) {
+        const formDataObj = new FormData();
+        Object.keys(formData).forEach(key => formDataObj.append(key, formData[key]));
+        formDataObj.append('profile_picture', profileImage);
+        payload = formDataObj;
+      }
+
+      const response = await updateProfile(payload);
       if (response.success) {
         // Update the profile data with the response
         setProfileData(response.user);
+        setImagePreview(response.user.profile_picture);
+        setProfileImage(null);
         setFormData({
           email: response.user.email,
           phone: response.user.details?.phone || '',
@@ -73,7 +86,17 @@ const Profile = () => {
       address: profileData?.details?.address || '',
       date_of_birth: profileData?.details?.date_of_birth || '',
     });
+    setImagePreview(profileData?.profile_picture);
+    setProfileImage(null);
     setEditing(false);
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setProfileImage(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
   };
 
   const getRoleSpecificInfo = () => {
@@ -160,8 +183,26 @@ const Profile = () => {
         <div className="lg:col-span-1">
           <div className="card">
             <div className="card-body text-center">
-              <div className="h-24 w-24 bg-primary-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <User className="h-12 w-12 text-white" />
+              <div className="relative h-24 w-24 mx-auto mb-4">
+                <div className="h-24 w-24 bg-primary-500 rounded-full flex items-center justify-center overflow-hidden">
+                  {imagePreview ? (
+                    <img src={imagePreview} alt="Profile" className="h-full w-full object-cover" />
+                  ) : (
+                    <User className="h-12 w-12 text-white" />
+                  )}
+                </div>
+                {editing && (
+                  <label htmlFor="profile-upload" className="absolute bottom-0 right-0 bg-white rounded-full p-1 shadow-md cursor-pointer hover:bg-gray-100 transition-colors">
+                    <Camera className="h-4 w-4 text-gray-600" />
+                    <input 
+                      id="profile-upload" 
+                      type="file" 
+                      className="hidden" 
+                      accept="image/*"
+                      onChange={handleImageChange}
+                    />
+                  </label>
+                )}
               </div>
               <h2 className="text-xl font-semibold text-secondary-900">
                 {profileData?.details?.first_name || profileData?.username}
