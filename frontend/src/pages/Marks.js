@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import { marksAPI, subjectsAPI, departmentsAPI, studentsAPI } from '../services/api';
 import { Award, Search, Filter, TrendingUp, TrendingDown, Plus, Edit, Trash2 } from 'lucide-react';
 
 const Marks = () => {
+  const { user } = useAuth();
   const [marks, setMarks] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [departments, setDepartments] = useState([]);
@@ -157,10 +159,12 @@ const Marks = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-secondary-900">Marks Management</h1>
-        <button className="btn btn-primary flex items-center" onClick={handleAddMark}>
-          <Award className="h-4 w-4 mr-2" />
-          Add Marks
-        </button>
+        {user && user.role !== 'student' && (
+          <button className="btn btn-primary flex items-center" onClick={handleAddMark}>
+            <Award className="h-4 w-4 mr-2" />
+            Add Marks
+          </button>
+        )}
       </div>
 
       {/* Performance Summary */}
@@ -274,7 +278,7 @@ const Marks = () => {
                 <th>Marks</th>
                 <th>Percentage</th>
                 <th>Faculty</th>
-                <th>Actions</th>
+                {user && user.role !== 'student' && <th>Actions</th>}
               </tr>
             </thead>
             <tbody>
@@ -304,6 +308,7 @@ const Marks = () => {
                       </span>
                     </td>
                     <td>Admin</td>
+                    {user && user.role !== 'student' && (
                     <td>
                       <div className="flex space-x-2">
                         <button 
@@ -320,6 +325,7 @@ const Marks = () => {
                         </button>
                       </div>
                     </td>
+                    )}
                   </tr>
                 );
               })}

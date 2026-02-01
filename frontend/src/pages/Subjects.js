@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import { subjectsAPI, departmentsAPI } from '../services/api';
 import { BookOpen, Plus, Edit, Trash2, Search, Clock } from 'lucide-react';
 
 const Subjects = () => {
+  const { user } = useAuth();
   const [subjects, setSubjects] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -110,10 +112,12 @@ const Subjects = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-secondary-900">Subjects Management</h1>
-        <button className="btn btn-primary flex items-center" onClick={handleAddSubject}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Subject
-        </button>
+        {user && user.role !== 'student' && (
+          <button className="btn btn-primary flex items-center" onClick={handleAddSubject}>
+            <Plus className="h-4 w-4 mr-2" />
+            Add Subject
+          </button>
+        )}
       </div>
 
       {/* Filters */}
@@ -186,6 +190,7 @@ const Subjects = () => {
                 </div>
               )}
 
+              {user && user.role !== 'student' && (
               <div className="flex justify-end space-x-2 mt-4">
                 <button 
                   className="text-blue-600 hover:text-blue-800"
@@ -200,6 +205,7 @@ const Subjects = () => {
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>
+              )}
             </div>
           </div>
         ))}

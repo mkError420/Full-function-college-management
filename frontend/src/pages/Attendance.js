@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 import { attendanceAPI, subjectsAPI, departmentsAPI, studentsAPI } from '../services/api';
 import { Calendar, Search, Filter, CheckCircle, XCircle, Clock, Plus, Edit, Trash2 } from 'lucide-react';
 
 const Attendance = () => {
+  const { user } = useAuth();
   const [attendance, setAttendance] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [departments, setDepartments] = useState([]);
@@ -183,10 +185,12 @@ const Attendance = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-secondary-900">Attendance Management</h1>
-        <button className="btn btn-primary flex items-center" onClick={handleAddAttendance}>
-          <Calendar className="h-4 w-4 mr-2" />
-          Mark Attendance
-        </button>
+        {user && user.role !== 'student' && (
+          <button className="btn btn-primary flex items-center" onClick={handleAddAttendance}>
+            <Calendar className="h-4 w-4 mr-2" />
+            Mark Attendance
+          </button>
+        )}
       </div>
 
       {/* Attendance Summary */}
@@ -293,7 +297,7 @@ const Attendance = () => {
                 <th>Status</th>
                 <th>Faculty</th>
                 <th>Remarks</th>
-                <th>Actions</th>
+                {user && user.role !== 'student' && <th>Actions</th>}
               </tr>
             </thead>
             <tbody>
@@ -317,6 +321,7 @@ const Attendance = () => {
                     <td>{getStatusBadge(record.status)}</td>
                     <td>Admin</td>
                     <td className="text-sm text-secondary-600">{record.remarks || '-'}</td>
+                    {user && user.role !== 'student' && (
                     <td>
                       <div className="flex space-x-2">
                         <button 
@@ -333,6 +338,7 @@ const Attendance = () => {
                         </button>
                       </div>
                     </td>
+                    )}
                   </tr>
                 );
               })}
