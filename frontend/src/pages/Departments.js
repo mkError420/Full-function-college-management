@@ -45,25 +45,39 @@ const Departments = () => {
   const handleDeleteDepartment = async (departmentId) => {
     if (window.confirm('Are you sure you want to delete this department?')) {
       try {
-        await departmentsAPI.delete(departmentId);
-        fetchDepartments();
+        const response = await departmentsAPI.delete(departmentId);
+        if (response.data && response.data.success) {
+          fetchDepartments();
+          alert('Department deleted successfully!');
+        } else {
+          alert('Error deleting department: ' + (response.data?.message || 'Unknown error'));
+        }
       } catch (error) {
         console.error('Error deleting department:', error);
+        alert('Error deleting department. Please try again.');
       }
     }
   };
 
   const handleSaveDepartment = async (departmentData) => {
     try {
+      let response;
       if (editingDepartment) {
-        await departmentsAPI.update(editingDepartment.id, departmentData);
+        response = await departmentsAPI.update(editingDepartment.id, departmentData);
       } else {
-        await departmentsAPI.create(departmentData);
+        response = await departmentsAPI.create(departmentData);
       }
-      setShowModal(false);
-      fetchDepartments();
+      
+      if (response.data && response.data.success) {
+        setShowModal(false);
+        fetchDepartments();
+        alert(editingDepartment ? 'Department updated successfully!' : 'Department added successfully!');
+      } else {
+        alert('Error saving department: ' + (response.data?.message || 'Unknown error'));
+      }
     } catch (error) {
       console.error('Error saving department:', error);
+      alert('Error saving department. Please try again.');
     }
   };
 
@@ -202,6 +216,15 @@ const DepartmentForm = ({ department, onSave, onCancel }) => {
     department_code: department?.department_code || '',
     description: department?.description || ''
   });
+
+  // Update form data when department prop changes (for editing)
+  useEffect(() => {
+    setFormData({
+      department_name: department?.department_name || '',
+      department_code: department?.department_code || '',
+      description: department?.description || ''
+    });
+  }, [department]);
 
   const handleSubmit = (e) => {
     e.preventDefault();

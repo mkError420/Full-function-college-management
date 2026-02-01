@@ -78,25 +78,39 @@ const Students = () => {
   const handleDeleteStudent = async (studentId) => {
     if (window.confirm('Are you sure you want to delete this student?')) {
       try {
-        await studentsAPI.delete(studentId);
-        fetchStudents();
+        const response = await studentsAPI.delete(studentId);
+        if (response.data && response.data.success) {
+          fetchStudents();
+          alert('Student deleted successfully!');
+        } else {
+          alert('Error deleting student: ' + (response.data?.message || 'Unknown error'));
+        }
       } catch (error) {
         console.error('Error deleting student:', error);
+        alert('Error deleting student. Please try again.');
       }
     }
   };
 
   const handleSaveStudent = async (studentData) => {
     try {
+      let response;
       if (editingStudent) {
-        await studentsAPI.update(editingStudent.id, studentData);
+        response = await studentsAPI.update(editingStudent.id, studentData);
       } else {
-        await studentsAPI.create(studentData);
+        response = await studentsAPI.create(studentData);
       }
-      setShowModal(false);
-      fetchStudents();
+      
+      if (response.data && response.data.success) {
+        setShowModal(false);
+        fetchStudents();
+        alert(editingStudent ? 'Student updated successfully!' : 'Student added successfully!');
+      } else {
+        alert('Error saving student: ' + (response.data?.message || 'Unknown error'));
+      }
     } catch (error) {
       console.error('Error saving student:', error);
+      alert('Error saving student. Please try again.');
     }
   };
 
@@ -166,32 +180,37 @@ const Students = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredStudents.map(student => (
-                <tr key={student.id}>
-                  <td className="font-medium">{student.roll_number}</td>
-                  <td>{student.first_name} {student.last_name}</td>
-                  <td>{student.department_name}</td>
-                  <td>{student.batch_name || 'N/A'}</td>
-                  <td>{student.semester}</td>
-                  <td>{getStatusBadge(student.status)}</td>
-                  <td>
-                    <div className="flex space-x-2">
-                      <button 
-                        className="text-blue-600 hover:text-blue-800"
-                        onClick={() => handleEditStudent(student)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </button>
-                      <button 
-                        className="text-red-600 hover:text-red-800"
-                        onClick={() => handleDeleteStudent(student.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              {filteredStudents.map(student => {
+                const department = departments.find(dept => dept.id == student.department_id);
+                const batch = batches.find(b => b.id == student.batch_id);
+                
+                return (
+                  <tr key={student.id}>
+                    <td className="font-medium">{student.roll_number}</td>
+                    <td>{student.first_name} {student.last_name}</td>
+                    <td>{department ? department.department_name : 'Unknown Department'}</td>
+                    <td>{batch ? batch.batch_name : 'Unknown Batch'}</td>
+                    <td>{student.semester}</td>
+                    <td>{getStatusBadge(student.status)}</td>
+                    <td>
+                      <div className="flex space-x-2">
+                        <button 
+                          className="text-blue-600 hover:text-blue-800"
+                          onClick={() => handleEditStudent(student)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </button>
+                        <button 
+                          className="text-red-600 hover:text-red-800"
+                          onClick={() => handleDeleteStudent(student.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -243,6 +262,24 @@ const StudentForm = ({ student, departments, batches, onSave, onCancel }) => {
     address: student?.address || '',
     admission_date: student?.admission_date || ''
   });
+
+  // Update form data when student prop changes (for editing)
+  useEffect(() => {
+    setFormData({
+      roll_number: student?.roll_number || '',
+      first_name: student?.first_name || '',
+      last_name: student?.last_name || '',
+      email: student?.email || '',
+      phone: student?.phone || '',
+      department_id: student?.department_id || '',
+      batch_id: student?.batch_id || '',
+      semester: student?.semester || 1,
+      date_of_birth: student?.date_of_birth || '',
+      gender: student?.gender || '',
+      address: student?.address || '',
+      admission_date: student?.admission_date || ''
+    });
+  }, [student]);
 
   const handleSubmit = (e) => {
     e.preventDefault();

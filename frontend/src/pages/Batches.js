@@ -16,10 +16,22 @@ const Batches = () => {
     fetchDepartments();
   }, []);
 
+  // Debug: Log component state after changes
+  useEffect(() => {
+    console.log('Batches component state updated:', { 
+      batchesLength: batches.length,
+      batchesData: batches.slice(0, 3) // Show first 3 batches for debugging
+    });
+  }, [batches]);
+
   const fetchBatches = async () => {
     try {
+      console.log('Fetching batches...');
       const response = await batchesAPI.getAll();
+      console.log('Batches response:', response);
+      console.log('Batches data:', response.data);
       setBatches(response.data);
+      console.log('Batches state set to:', response.data);
     } catch (error) {
       console.error('Error fetching batches:', error);
     } finally {
@@ -65,25 +77,49 @@ const Batches = () => {
   const handleDeleteBatch = async (batchId) => {
     if (window.confirm('Are you sure you want to delete this batch?')) {
       try {
-        await batchesAPI.delete(batchId);
-        fetchBatches();
+        const response = await batchesAPI.delete(batchId);
+        if (response.data && response.data.success) {
+          fetchBatches();
+          alert('Batch deleted successfully!');
+        } else {
+          alert('Error deleting batch: ' + (response.data?.message || 'Unknown error'));
+        }
       } catch (error) {
         console.error('Error deleting batch:', error);
+        alert('Error deleting batch. Please try again.');
       }
     }
   };
 
   const handleSaveBatch = async (batchData) => {
     try {
+      console.log('Saving batch data:', batchData);
+      console.log('Editing batch:', editingBatch);
+      
+      let response;
       if (editingBatch) {
-        await batchesAPI.update(editingBatch.id, batchData);
+        console.log('Updating batch with ID:', editingBatch.id);
+        response = await batchesAPI.update(editingBatch.id, batchData);
       } else {
-        await batchesAPI.create(batchData);
+        console.log('Creating new batch');
+        response = await batchesAPI.create(batchData);
       }
-      setShowModal(false);
-      fetchBatches();
+      
+      console.log('Batch save response:', response);
+      console.log('Response data:', response.data);
+      
+      if (response.data && response.data.success) {
+        console.log('Save successful, closing modal and fetching batches');
+        setShowModal(false);
+        fetchBatches();
+        alert(editingBatch ? 'Batch updated successfully!' : 'Batch added successfully!');
+      } else {
+        console.log('Save failed:', response.data);
+        alert('Error saving batch: ' + (response.data?.message || 'Unknown error'));
+      }
     } catch (error) {
       console.error('Error saving batch:', error);
+      alert('Error saving batch. Please try again.');
     }
   };
 
@@ -227,6 +263,19 @@ const BatchForm = ({ batch, departments, onSave, onCancel }) => {
     strength: batch?.strength || '',
     status: batch?.status || 'active'
   });
+
+  // Update form data when batch prop changes (for editing)
+  useEffect(() => {
+    setFormData({
+      batch_name: batch?.batch_name || '',
+      batch_code: batch?.batch_code || '',
+      department_id: batch?.department_id || '',
+      start_date: batch?.start_date || '',
+      end_date: batch?.end_date || '',
+      strength: batch?.strength || '',
+      status: batch?.status || 'active'
+    });
+  }, [batch]);
 
   const handleSubmit = (e) => {
     e.preventDefault();

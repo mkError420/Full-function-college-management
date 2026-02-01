@@ -383,6 +383,17 @@ const AttendanceForm = ({ attendance, students, subjects, onSave, onCancel }) =>
     remarks: attendance?.remarks || ''
   });
 
+  // Update form data when attendance prop changes (for editing)
+  useEffect(() => {
+    setFormData({
+      student_id: attendance?.student_id || '',
+      subject_id: attendance?.subject_id || '',
+      date: attendance?.date || new Date().toISOString().split('T')[0],
+      status: attendance?.status || 'present',
+      remarks: attendance?.remarks || ''
+    });
+  }, [attendance]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log('Form submitted with data:', formData);

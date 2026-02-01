@@ -245,6 +245,18 @@ const SubjectForm = ({ subject, departments, onSave, onCancel }) => {
     description: subject?.description || ''
   });
 
+  // Update form data when subject prop changes (for editing)
+  useEffect(() => {
+    setFormData({
+      subject_name: subject?.subject_name || '',
+      subject_code: subject?.subject_code || '',
+      department_id: subject?.department_id || '',
+      semester: subject?.semester || '',
+      credit_hours: subject?.credit_hours || '',
+      description: subject?.description || ''
+    });
+  }, [subject]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     onSave(formData);

@@ -370,6 +370,19 @@ const MarksForm = ({ mark, students, subjects, onSave, onCancel }) => {
     remarks: mark?.remarks || ''
   });
 
+  // Update form data when mark prop changes (for editing)
+  useEffect(() => {
+    setFormData({
+      student_id: mark?.student_id || '',
+      subject_id: mark?.subject_id || '',
+      exam_type: mark?.exam_type || '',
+      max_marks: mark?.max_marks || '',
+      obtained_marks: mark?.obtained_marks || '',
+      exam_date: mark?.exam_date || '',
+      remarks: mark?.remarks || ''
+    });
+  }, [mark]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     onSave(formData);
