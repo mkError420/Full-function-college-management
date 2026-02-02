@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { studentsAPI, departmentsAPI, batchesAPI } from '../services/api';
-import { Users, Plus, Edit, Trash2, Search, Filter } from 'lucide-react';
+import { Users, Plus, Edit, Trash2, Search, Filter, Eye, EyeOff } from 'lucide-react';
 
 const Students = () => {
   const [students, setStudents] = useState([]);
@@ -177,6 +177,8 @@ const Students = () => {
               <thead>
                 <tr className="bg-gray-50 border-b border-secondary-200">
                   <th className="px-2 py-1 text-left text-xs font-medium text-secondary-700">Roll Number</th>
+                  <th className="px-2 py-1 text-left text-xs font-medium text-secondary-700">Username</th>
+                  <th className="px-2 py-1 text-left text-xs font-medium text-secondary-700">Password</th>
                   <th className="px-2 py-1 text-left text-xs font-medium text-secondary-700">Name</th>
                   <th className="px-2 py-1 text-left text-xs font-medium text-secondary-700">Department</th>
                   <th className="px-2 py-1 text-left text-xs font-medium text-secondary-700">Batch</th>
@@ -193,6 +195,14 @@ const Students = () => {
                   return (
                     <tr key={student.id} className="hover:bg-gray-50">
                       <td className="px-2 py-1 text-xs font-medium">{student.roll_number}</td>
+                      <td className="px-2 py-1 text-xs text-primary-700 font-medium">{student.username}</td>
+                      <td 
+                        className="px-2 py-1 text-xs text-secondary-400 tracking-widest cursor-pointer hover:text-primary-600" 
+                        title="Click to change password"
+                        onClick={() => handleEditStudent(student)}
+                      >
+                        ********
+                      </td>
                       <td className="px-2 py-1 text-xs">{student.first_name} {student.last_name}</td>
                       <td className="px-2 py-1 text-xs">{department ? department.department_name : 'Unknown Department'}</td>
                       <td className="px-2 py-1 text-xs">{batch ? batch.batch_name : 'Unknown Batch'}</td>
@@ -255,7 +265,10 @@ const Students = () => {
 
 // Student Form Component
 const StudentForm = ({ student, departments, batches, onSave, onCancel }) => {
+  const [showPassword, setShowPassword] = useState(true);
   const [formData, setFormData] = useState({
+    username: student?.username || '',
+    password: '',
     roll_number: student?.roll_number || '',
     first_name: student?.first_name || '',
     last_name: student?.last_name || '',
@@ -273,6 +286,8 @@ const StudentForm = ({ student, departments, batches, onSave, onCancel }) => {
   // Update form data when student prop changes (for editing)
   useEffect(() => {
     setFormData({
+      username: student?.username || '',
+      password: '',
       roll_number: student?.roll_number || '',
       first_name: student?.first_name || '',
       last_name: student?.last_name || '',
@@ -303,6 +318,42 @@ const StudentForm = ({ student, departments, batches, onSave, onCancel }) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <div>
+          <label className="block text-xs font-medium text-secondary-700 mb-1">Username</label>
+          <input
+            type="text"
+            name="username"
+            value={formData.username}
+            onChange={handleChange}
+            className="input text-xs"
+            placeholder="e.g., john.doe"
+            required
+          />
+        </div>
+        
+        <div>
+          <label className="block text-xs font-medium text-secondary-700 mb-1">Password</label>
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              onFocus={() => setShowPassword(true)}
+              className="input text-xs pr-8"
+              placeholder={student ? "Leave blank to keep current" : "Enter password"}
+              required={!student}
+            />
+            <button
+              type="button"
+              className="absolute inset-y-0 right-0 pr-2 flex items-center"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? <EyeOff className="h-3 w-3 text-secondary-400" /> : <Eye className="h-3 w-3 text-secondary-400" />}
+            </button>
+          </div>
+        </div>
+
         <div>
           <label className="block text-xs font-medium text-secondary-700 mb-1">Roll Number</label>
           <input

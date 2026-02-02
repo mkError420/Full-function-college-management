@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { facultyAPI, departmentsAPI } from '../services/api';
-import { GraduationCap, Plus, Edit, Trash2, Search, Mail, Phone, Calendar } from 'lucide-react';
+import { GraduationCap, Plus, Edit, Trash2, Search, Mail, Phone, Calendar, Eye, EyeOff } from 'lucide-react';
 
 const Faculty = () => {
   const [faculty, setFaculty] = useState([]);
@@ -161,6 +161,14 @@ const Faculty = () => {
                       {member.first_name} {member.last_name}
                     </h3>
                     <p className="text-xs text-secondary-500">{member.designation}</p>
+                    <p className="text-xs text-primary-600 font-medium">@{member.username}</p>
+                    <p 
+                      className="text-xs text-secondary-400 mt-1 tracking-widest cursor-pointer hover:text-primary-600"
+                      title="Click to change password"
+                      onClick={() => handleEditFaculty(member)}
+                    >
+                      ••••••••
+                    </p>
                   </div>
                 </div>
                 
@@ -238,7 +246,10 @@ const Faculty = () => {
 
 // Faculty Form Component
 const FacultyForm = ({ faculty, departments, onSave, onCancel }) => {
+  const [showPassword, setShowPassword] = useState(true);
   const [formData, setFormData] = useState({
+    username: faculty?.username || '',
+    password: '',
     first_name: faculty?.first_name || '',
     last_name: faculty?.last_name || '',
     email: faculty?.email || '',
@@ -252,6 +263,8 @@ const FacultyForm = ({ faculty, departments, onSave, onCancel }) => {
   // Update form data when faculty prop changes (for editing)
   useEffect(() => {
     setFormData({
+      username: faculty?.username || '',
+      password: '',
       first_name: faculty?.first_name || '',
       last_name: faculty?.last_name || '',
       email: faculty?.email || '',
@@ -278,6 +291,42 @@ const FacultyForm = ({ faculty, departments, onSave, onCancel }) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <div>
+          <label className="block text-xs font-medium text-secondary-700 mb-1">Username</label>
+          <input
+            type="text"
+            name="username"
+            value={formData.username}
+            onChange={handleChange}
+            className="input text-xs"
+            placeholder="e.g., dr.smith"
+            required
+          />
+        </div>
+        
+        <div>
+          <label className="block text-xs font-medium text-secondary-700 mb-1">Password</label>
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              onFocus={() => setShowPassword(true)}
+              className="input text-xs pr-8"
+              placeholder={faculty ? "Leave blank to keep current" : "Enter password"}
+              required={!faculty}
+            />
+            <button
+              type="button"
+              className="absolute inset-y-0 right-0 pr-2 flex items-center"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? <EyeOff className="h-3 w-3 text-secondary-400" /> : <Eye className="h-3 w-3 text-secondary-400" />}
+            </button>
+          </div>
+        </div>
+
         <div>
           <label className="block text-xs font-medium text-secondary-700 mb-1">First Name</label>
           <input

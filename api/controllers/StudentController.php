@@ -212,11 +212,28 @@ class StudentController {
         try {
             $this->db->beginTransaction();
             
-            // Update user table if email is provided
+            // Update user table (email, username, password)
+            $user_fields = [];
+            $user_values = [];
+
             if (isset($data->email)) {
-                $user_query = "UPDATE users SET email = ? WHERE user_id = ?";
+                $user_fields[] = "email = ?";
+                $user_values[] = $data->email;
+            }
+            if (isset($data->username) && $current_user->role === 'admin') {
+                $user_fields[] = "username = ?";
+                $user_values[] = $data->username;
+            }
+            if (isset($data->password) && !empty($data->password) && $current_user->role === 'admin') {
+                $user_fields[] = "password_hash = ?";
+                $user_values[] = password_hash($data->password, PASSWORD_DEFAULT);
+            }
+
+            if (!empty($user_fields)) {
+                $user_values[] = $user_id;
+                $user_query = "UPDATE users SET " . implode(', ', $user_fields) . " WHERE user_id = ?";
                 $user_stmt = $this->db->prepare($user_query);
-                $user_stmt->execute([$data->email, $user_id]);
+                $user_stmt->execute($user_values);
             }
             
             // Update student table
