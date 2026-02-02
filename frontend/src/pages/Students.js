@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { studentsAPI, departmentsAPI, batchesAPI } from '../services/api';
-import { Users, Plus, Edit, Trash2, Search, Filter, Eye, EyeOff } from 'lucide-react';
+import { Users, Plus, Edit, Trash2, Search, Filter } from 'lucide-react';
 
 const Students = () => {
   const [students, setStudents] = useState([]);
@@ -268,7 +268,6 @@ const Students = () => {
 
 // Student Form Component
 const StudentForm = ({ student, departments, batches, onSave, onCancel }) => {
-  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     username: student?.username || '',
     password: student?.plain_password || '',
@@ -336,24 +335,15 @@ const StudentForm = ({ student, departments, batches, onSave, onCancel }) => {
         
         <div>
           <label className="block text-xs font-medium text-secondary-700 mb-1">Password</label>
-          <div className="relative">
-            <input
-              type={showPassword ? "text" : "password"}
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className="input text-xs pr-8"
-              placeholder={student ? "Enter new password to change" : "Enter password"}
-              required={!student}
-            />
-            <button
-              type="button"
-              className="absolute inset-y-0 right-0 pr-2 flex items-center"
-              onClick={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? <EyeOff className="h-3 w-3 text-secondary-400" /> : <Eye className="h-3 w-3 text-secondary-400" />}
-            </button>
-          </div>
+          <input
+            type="text"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            className="input text-xs"
+            placeholder={student ? "Enter new password to change" : "Enter password"}
+            required={!student}
+          />
         </div>
 
         <div>
