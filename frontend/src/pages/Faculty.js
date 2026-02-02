@@ -162,13 +162,14 @@ const Faculty = () => {
                     </h3>
                     <p className="text-xs text-secondary-500">{member.designation}</p>
                     <p className="text-xs text-primary-600 font-medium">@{member.username}</p>
-                    <p 
-                      className="text-xs text-secondary-400 mt-1 tracking-widest cursor-pointer hover:text-primary-600"
+                    <div 
+                      className="flex items-center mt-1 cursor-pointer group"
                       title="Click to change password"
                       onClick={() => handleEditFaculty(member)}
                     >
-                      ••••••••
-                    </p>
+                      <span className="text-xs text-secondary-500 mr-1">Password:</span>
+                      <span className="text-xs text-secondary-500 tracking-widest group-hover:text-primary-600">********</span>
+                    </div>
                   </div>
                 </div>
                 
@@ -246,7 +247,7 @@ const Faculty = () => {
 
 // Faculty Form Component
 const FacultyForm = ({ faculty, departments, onSave, onCancel }) => {
-  const [showPassword, setShowPassword] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     username: faculty?.username || '',
     password: '',
@@ -312,9 +313,8 @@ const FacultyForm = ({ faculty, departments, onSave, onCancel }) => {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              onFocus={() => setShowPassword(true)}
               className="input text-xs pr-8"
-              placeholder={faculty ? "Leave blank to keep current" : "Enter password"}
+              placeholder={faculty ? "Enter new password to change" : "Enter password"}
               required={!faculty}
             />
             <button

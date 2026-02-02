@@ -197,7 +197,7 @@ const Students = () => {
                       <td className="px-2 py-1 text-xs font-medium">{student.roll_number}</td>
                       <td className="px-2 py-1 text-xs text-primary-700 font-medium">{student.username}</td>
                       <td 
-                        className="px-2 py-1 text-xs text-secondary-400 tracking-widest cursor-pointer hover:text-primary-600" 
+                        className="px-2 py-1 text-xs text-secondary-600 tracking-widest cursor-pointer hover:text-primary-600 font-medium" 
                         title="Click to change password"
                         onClick={() => handleEditStudent(student)}
                       >
@@ -265,7 +265,7 @@ const Students = () => {
 
 // Student Form Component
 const StudentForm = ({ student, departments, batches, onSave, onCancel }) => {
-  const [showPassword, setShowPassword] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     username: student?.username || '',
     password: '',
@@ -339,9 +339,8 @@ const StudentForm = ({ student, departments, batches, onSave, onCancel }) => {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              onFocus={() => setShowPassword(true)}
               className="input text-xs pr-8"
-              placeholder={student ? "Leave blank to keep current" : "Enter password"}
+              placeholder={student ? "Enter new password to change" : "Enter password"}
               required={!student}
             />
             <button
