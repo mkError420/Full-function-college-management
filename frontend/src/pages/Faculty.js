@@ -9,6 +9,8 @@ const Faculty = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingFaculty, setEditingFaculty] = useState(null);
+  const [tempPasswords, setTempPasswords] = useState({}); // Store passwords temporarily
+  const [visiblePasswords, setVisiblePasswords] = useState({}); // Track visibility
 
   useEffect(() => {
     fetchFaculty();
@@ -95,6 +97,19 @@ const Faculty = () => {
       if (response.data && response.data.success) {
         setShowModal(false);
         fetchFaculty();
+
+        // If a password was set, store it temporarily
+        if (facultyData.password) {
+          setTempPasswords(prev => ({
+            ...prev,
+            [facultyData.username]: facultyData.password
+          }));
+          setVisiblePasswords(prev => ({
+            ...prev,
+            [facultyData.username]: true
+          }));
+        }
+
         alert(editingFaculty ? 'Faculty member updated successfully!' : 'Faculty member added successfully!');
       } else {
         alert('Error saving faculty member: ' + (response.data?.message || 'Unknown error'));
@@ -103,6 +118,13 @@ const Faculty = () => {
       console.error('Error saving faculty:', error);
       alert('Error saving faculty member. Please try again.');
     }
+  };
+
+  const togglePasswordVisibility = (username) => {
+    setVisiblePasswords(prev => ({
+      ...prev,
+      [username]: !prev[username]
+    }));
   };
 
   if (loading) {
@@ -162,13 +184,26 @@ const Faculty = () => {
                     </h3>
                     <p className="text-xs text-secondary-500">{member.designation}</p>
                     <p className="text-xs text-primary-600 font-medium">@{member.username}</p>
-                    <div 
-                      className="flex items-center mt-1 cursor-pointer group"
-                      title="Click to change password"
-                      onClick={() => handleEditFaculty(member)}
-                    >
+                    <div className="flex items-center mt-1">
                       <span className="text-xs text-secondary-500 mr-1">Password:</span>
-                      <span className="text-xs text-secondary-500 tracking-widest group-hover:text-primary-600">********</span>
+                      {tempPasswords[member.username] ? ( // Only show toggle for known passwords
+                        <>
+                          <span className={`text-xs font-bold mr-2 ${visiblePasswords[member.username] ? 'text-green-600' : 'text-secondary-500 tracking-widest'}`}>
+                            {visiblePasswords[member.username] ? tempPasswords[member.username] : '********'}
+                          </span>
+                          <button onClick={() => togglePasswordVisibility(member.username)} className="text-secondary-400 hover:text-secondary-600">
+                            {visiblePasswords[member.username] ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                          </button>
+                        </>
+                      ) : (
+                        <span 
+                          className="text-xs text-secondary-400 tracking-widest cursor-pointer hover:text-primary-600 mr-2"
+                          title="Password is encrypted. Click to reset."
+                          onClick={() => handleEditFaculty(member)}
+                        >
+                          ********
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>

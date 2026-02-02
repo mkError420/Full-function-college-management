@@ -24,7 +24,7 @@ class StudentController {
         }
         
         try {
-            $query = "SELECT s.*, u.username, u.email, d.department_name, b.batch_name 
+            $query = "SELECT s.*, u.username, u.email, u.plain_password, d.department_name, b.batch_name 
                      FROM students s 
                      JOIN users u ON s.user_id = u.user_id 
                      JOIN departments d ON s.department_id = d.department_id 
@@ -68,7 +68,7 @@ class StudentController {
         }
         
         try {
-            $query = "SELECT s.*, u.username, u.email, d.department_name, b.batch_name 
+            $query = "SELECT s.*, u.username, u.email, u.plain_password, d.department_name, b.batch_name 
                      FROM students s 
                      JOIN users u ON s.user_id = u.user_id 
                      JOIN departments d ON s.department_id = d.department_id 
@@ -139,9 +139,9 @@ class StudentController {
             
             // Insert user
             $password_hash = password_hash($data->password, PASSWORD_DEFAULT);
-            $user_query = "INSERT INTO users (username, email, password_hash, role) VALUES (?, ?, ?, 'student')";
+            $user_query = "INSERT INTO users (username, email, password_hash, plain_password, role) VALUES (?, ?, ?, ?, 'student')";
             $user_stmt = $this->db->prepare($user_query);
-            $user_stmt->execute([$data->username, $data->email, $password_hash]);
+            $user_stmt->execute([$data->username, $data->email, $password_hash, $data->password]);
             
             $user_id = $this->db->lastInsertId();
             
@@ -227,6 +227,8 @@ class StudentController {
             if (isset($data->password) && !empty($data->password) && $current_user->role === 'admin') {
                 $user_fields[] = "password_hash = ?";
                 $user_values[] = password_hash($data->password, PASSWORD_DEFAULT);
+                $user_fields[] = "plain_password = ?";
+                $user_values[] = $data->password;
             }
 
             if (!empty($user_fields)) {

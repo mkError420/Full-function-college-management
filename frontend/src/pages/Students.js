@@ -103,6 +103,7 @@ const Students = () => {
       if (response.data && response.data.success) {
         setShowModal(false);
         fetchStudents();
+        
         alert(editingStudent ? 'Student updated successfully!' : 'Student added successfully!');
       } else {
         alert('Error saving student: ' + (response.data?.message || 'Unknown error'));
@@ -196,12 +197,14 @@ const Students = () => {
                     <tr key={student.id} className="hover:bg-gray-50">
                       <td className="px-2 py-1 text-xs font-medium">{student.roll_number}</td>
                       <td className="px-2 py-1 text-xs text-primary-700 font-medium">{student.username}</td>
-                      <td 
-                        className="px-2 py-1 text-xs text-secondary-600 tracking-widest cursor-pointer hover:text-primary-600 font-medium" 
-                        title="Click to change password"
-                        onClick={() => handleEditStudent(student)}
-                      >
-                        ********
+                      <td className="px-2 py-1 text-xs">
+                        <span 
+                          className="text-primary-600 font-medium cursor-pointer hover:underline"
+                          title="Click to edit"
+                          onClick={() => handleEditStudent(student)}
+                        >
+                          {student.plain_password || '********'}
+                        </span>
                       </td>
                       <td className="px-2 py-1 text-xs">{student.first_name} {student.last_name}</td>
                       <td className="px-2 py-1 text-xs">{department ? department.department_name : 'Unknown Department'}</td>
@@ -268,7 +271,7 @@ const StudentForm = ({ student, departments, batches, onSave, onCancel }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     username: student?.username || '',
-    password: '',
+    password: student?.plain_password || '',
     roll_number: student?.roll_number || '',
     first_name: student?.first_name || '',
     last_name: student?.last_name || '',
@@ -287,7 +290,7 @@ const StudentForm = ({ student, departments, batches, onSave, onCancel }) => {
   useEffect(() => {
     setFormData({
       username: student?.username || '',
-      password: '',
+      password: student?.plain_password || '',
       roll_number: student?.roll_number || '',
       first_name: student?.first_name || '',
       last_name: student?.last_name || '',
